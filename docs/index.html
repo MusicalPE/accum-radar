@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>매집 레이더</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --ink:#1b1f24; --sub:#5d6670; --line:#e3e6ea;
+  --accent:#0f766e; --flat:#64748b; --obv:#2563eb; --mf:#d97706; --flow:#0f766e;
+  --up:#d6336c; --down:#1c7ed6; --chip:#eef2f5;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111418; --card:#1a1f25; --ink:#e7ebef; --sub:#9aa4ae; --line:#2b323a;
+    --accent:#2dd4bf; --flat:#94a3b8; --obv:#60a5fa; --mf:#fbbf24; --flow:#2dd4bf;
+    --up:#f06595; --down:#4dabf7; --chip:#242b33;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111418; --card:#1a1f25; --ink:#e7ebef; --sub:#9aa4ae; --line:#2b323a;
+  --accent:#2dd4bf; --flat:#94a3b8; --obv:#60a5fa; --mf:#fbbf24; --flow:#2dd4bf;
+  --up:#f06595; --down:#4dabf7; --chip:#242b33;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px;margin-bottom:14px}
+h1{font-size:24px;margin:0;letter-spacing:-.5px}
+h1 span{color:var(--accent)}
+.meta{color:var(--sub);font-size:13px}
+.note{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--mf);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--sub);margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--sub);padding:6px 12px;font:inherit;font-size:13px;cursor:pointer}
+.seg button.on{background:var(--accent);color:#fff}
+input[type=search]{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;min-width:140px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--sub)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
+th{position:sticky;top:0;background:var(--card);text-align:right;color:var(--sub);font-weight:500;padding:8px 6px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none}
+th.l,td.l{text-align:left}
+td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+tr.row{cursor:pointer}
+tr.row:hover td{background:var(--chip)}
+tr.sel td{background:var(--chip)}
+.nm{font-weight:500}
+.code{color:var(--sub);font-size:11px;margin-left:4px}
+.mk{font-size:11px;padding:1px 6px;border-radius:10px;background:var(--chip);color:var(--sub)}
+.bar{display:flex;height:8px;width:110px;border-radius:4px;overflow:hidden;background:var(--chip);margin-left:auto}
+.bar span{display:block;height:100%}
+.sc{font-weight:700;margin-right:6px}
+.pos{color:var(--up)} .neg{color:var(--down)}
+#detail{display:none}
+.dhead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:baseline}
+.dhead h2{margin:0;font-size:20px}
+.dhead a{color:var(--accent);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+.kpi{background:var(--chip);border-radius:8px;padding:8px 10px}
+.kpi b{display:block;font-size:12px;color:var(--sub);font-weight:500}
+.kpi em{font-style:normal;font-size:18px;font-weight:700}
+.kpi small{display:block;color:var(--sub);font-size:11px}
+svg text{fill:var(--sub);font-size:10px;font-family:inherit}
+.why{font-size:13px;color:var(--sub);margin:6px 0 0;padding-left:18px}
+h3{font-size:16px;margin:0 0 8px}
+.bt-sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.empty{color:var(--sub);text-align:center;padding:40px 0}
+details summary{cursor:pointer;color:var(--sub);font-size:13px}
+details p,details li{font-size:13px;color:var(--sub)}
+footer{color:var(--sub);font-size:12px;text-align:center;margin-top:30px}
+@media (max-width:720px){
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bt-sum{grid-template-columns:1fr}
+  .hide-m{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>매집 <span>레이더</span></h1>
+    <div class="meta" id="meta">불러오는 중...</div>
+  </header>
+
+  <div class="note">가격은 크게 오르지 않았는데 매수 흔적(거래량·자금흐름·외국인과 기관 순매수)이 꾸준히 쌓이는 종목을 점수로 골라 보여 줍니다. 살펴볼 후보를 좁히는 용도이며 매수·매도 추천이 아닙니다. 매집처럼 보이던 흐름이 실제로는 물량을 넘기는 과정일 수도 있습니다.</div>
+
+  <div class="card">
+    <div class="controls">
+      <div class="seg" id="mkt">
+        <button data-v="ALL" class="on">전체</button><button data-v="KOSPI">코스피</button><button data-v="KOSDAQ">코스닥</button>
+      </div>
+      <input type="search" id="q" placeholder="종목명·코드 찾기">
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--flat)"></i>횡보 25</span>
+      <span><i style="background:var(--obv)"></i>OBV 25</span>
+      <span><i style="background:var(--mf)"></i>자금흐름 20</span>
+      <span><i style="background:var(--flow)"></i>수급 30</span>
+    </div>
+    <div class="tbl">
+      <table>
+        <thead><tr>
+          <th class="l" data-k="rank">#</th>
+          <th class="l" data-k="name">종목</th>
+          <th data-k="score">점수</th>
+          <th data-k="range_pct">가격 폭</th>
+          <th data-k="trend_pct" class="hide-m">추세</th>
+          <th data-k="obv_ratio">OBV</th>
+          <th data-k="cmf" class="hide-m">CMF</th>
+          <th data-k="smart">외인+기관(억)</th>
+          <th data-k="pos_ratio" class="hide-m">순매수일</th>
+          <th data-k="close">종가</th>
+        </tr></thead>
+        <tbody id="tb"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" id="detail"></div>
+
+  <div class="card" id="bt"></div>
+
+  <div class="card">
+    <details>
+      <summary>점수는 이렇게 매깁니다</summary>
+      <ul>
+        <li><b>횡보(25)</b> 최근 판단 기간 동안 최고가와 최저가 차이가 좁고(10% 안팎이면 만점), 추세선 기울기가 0에 가까울수록 높습니다.</li>
+        <li><b>OBV(25)</b> 오른 날 거래량은 더하고 내린 날 거래량은 빼서 쌓은 값입니다. 기간 거래량의 25% 이상이 꾸준히 쌓이면 만점입니다.</li>
+        <li><b>자금흐름(20)</b> 종가가 그날 고가 쪽에서 끝나는 날이 많을수록(CMF) 그리고 오른 날 거래량이 내린 날보다 많을수록 높습니다.</li>
+        <li><b>수급(30)</b> 외국인과 기관의 누적 순매수가 시가총액의 1% 이상이고, 순매수한 날이 많을수록 높습니다.</li>
+      </ul>
+      <p>시가총액 500억 미만, 하루 평균 거래대금 5억 미만, 스팩 종목은 제외합니다.</p>
+    </details>
+  </div>
+
+  <footer>매일 장 마감 후 자동으로 새로 계산됩니다. 자료: 한국거래소</footer>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let DATA = null, market = "ALL", query = "", sortKey = "score", sortDir = -1, selected = null;
+
+const fmt = (x, d=0) => x == null ? "-" : Number(x).toLocaleString("ko-KR", {maximumFractionDigits:d, minimumFractionDigits:d});
+const pct = (x, d=1) => x == null ? "-" : (x*100).toFixed(d) + "%";
+const eok = x => x == null ? "-" : fmt(x/1e8, 0);
+const sgn = x => x > 0 ? "pos" : x < 0 ? "neg" : "";
+
+fetch("data/latest.json?ts=" + Date.now()).then(r => r.json()).then(d => {
+  DATA = d;
+  d.candidates.forEach((c, i) => { c.rank = i + 1; c.smart = (c.net_frgn||0) + (c.net_inst||0); });
+  $("#meta").textContent = `기준일 ${d.date.slice(0,4)}.${d.date.slice(4,6)}.${d.date.slice(6)} · 판단 기간 ${d.params.window}거래일 · 대상 ${fmt(d.universe)}종목 · 갱신 ${d.generated}`;
+  render(); renderBT();
+}).catch(() => {
+  $("#meta").textContent = "";
+  $("#tb").innerHTML = `<tr><td colspan="10" class="empty">아직 결과가 없습니다. 자료를 처음 모으는 중이면 잠시 뒤에 다시 열어 주세요.</td></tr>`;
+});
+
+document.querySelectorAll("#mkt button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("#mkt button").forEach(x => x.classList.remove("on"));
+  b.classList.add("on"); market = b.dataset.v; render();
+});
+$("#q").oninput = e => { query = e.target.value.trim(); render(); };
+document.querySelectorAll("th[data-k]").forEach(th => th.onclick = () => {
+  const k = th.dataset.k;
+  if (sortKey === k) sortDir *= -1; else { sortKey = k; sortDir = (k === "range_pct" || k === "rank" || k === "name") ? 1 : -1; }
+  render();
+});
+
+function render(){
+  if (!DATA) return;
+  let rows = DATA.candidates.filter(c => (market === "ALL" || c.market === market) &&
+    (!query || c.name.includes(query) || c.ticker.includes(query)));
+  rows.sort((a,b) => {
+    const x = a[sortKey], y = b[sortKey];
+    if (typeof x === "string") return x.localeCompare(y) * sortDir;
+    return ((x ?? -1e18) - (y ?? -1e18)) * sortDir;
+  });
+  if (!rows.length) { $("#tb").innerHTML = `<tr><td colspan="10" class="empty">조건에 맞는 종목이 없습니다.</td></tr>`; return; }
+  $("#tb").innerHTML = rows.map(c => `
+    <tr class="row ${c.ticker===selected?'sel':''}" data-t="${c.ticker}">
+      <td class="l">${c.rank}</td>
+      <td class="l"><span class="nm">${c.name}</span><span class="code">${c.ticker}</span> <span class="mk">${c.market==="KOSPI"?"코스피":"코스닥"}</span></td>
+      <td><div style="display:flex;align-items:center;justify-content:flex-end"><span class="sc">${fmt(c.score,0)}</span>${bar(c)}</div></td>
+      <td>${pct(c.range_pct)}</td>
+      <td class="hide-m ${sgn(c.trend_pct)}">${pct(c.trend_pct)}</td>
+      <td class="${sgn(c.obv_ratio)}">${pct(c.obv_ratio,0)}</td>
+      <td class="hide-m ${sgn(c.cmf)}">${fmt(c.cmf,2)}</td>
+      <td class="${sgn(c.smart)}">${eok(c.smart)}</td>
+      <td class="hide-m">${pct(c.pos_ratio,0)}</td>
+      <td>${fmt(c.close)}</td>
+    </tr>`).join("");
+  document.querySelectorAll("tr.row").forEach(tr => tr.onclick = () => showDetail(tr.dataset.t));
+}
+
+function bar(c){
+  const p = (v, col) => `<span style="width:${Math.max(0,v)}%;background:var(${col})"></span>`;
+  return `<div class="bar">${p(c.s_flat,"--flat")}${p(c.s_obv,"--obv")}${p(c.s_mf,"--mf")}${p(c.s_flow,"--flow")}</div>`;
+}
+
+function showDetail(tk){
+  selected = tk; render();
+  const c = DATA.candidates.find(x => x.ticker === tk);
+  const s = DATA.series[tk];
+  const el = $("#detail");
+  el.style.display = "block";
+  const why = [];
+  if (c.s_flat >= 18) why.push(`가격이 ${pct(c.range_pct)} 폭 안에서 움직였고 추세는 ${pct(c.trend_pct)}로 거의 평평합니다.`);
+  if (c.s_obv >= 15) why.push(`OBV가 꾸준히 올라 기간 거래량의 ${pct(c.obv_ratio,0)} 정도가 매수 쪽으로 쌓였습니다.`);
+  if (c.cmf > 0.05) why.push(`종가가 그날 고가 쪽에서 끝난 날이 많았습니다(CMF ${fmt(c.cmf,2)}).`);
+  if (c.smart > 0) why.push(`외국인 ${eok(c.net_frgn)}억, 기관 ${eok(c.net_inst)}억(이 중 연기금 ${eok(c.net_pension)}억) 순매수, 순매수한 날이 ${pct(c.pos_ratio,0)}입니다.`);
+  if (c.s_flow < 5) why.push(`외국인·기관 수급 점수는 낮습니다. 거래량 지표만으로 뽑힌 경우라 더 조심해서 보세요.`);
+  el.innerHTML = `
+    <div class="dhead"><h2>${c.name} <span class="code">${c.ticker}</span></h2>
+      <a href="https://finance.naver.com/item/main.naver?code=${c.ticker}" target="_blank" rel="noopener">네이버 증권에서 보기</a></div>
+    <div class="grid">
+      <div class="kpi"><b>종합 점수</b><em>${fmt(c.score,0)}</em><small>100점 만점</small></div>
+      <div class="kpi"><b>횡보 · OBV</b><em>${fmt(c.s_flat,0)} · ${fmt(c.s_obv,0)}</em><small>각 25점 만점</small></div>
+      <div class="kpi"><b>자금흐름</b><em>${fmt(c.s_mf,0)}</em><small>20점 만점</small></div>
+      <div class="kpi"><b>수급</b><em>${fmt(c.s_flow,0)}</em><small>30점 만점</small></div>
+    </div>
+    <ul class="why">${why.map(w=>`<li>${w}</li>`).join("")}</ul>
+    <div id="chart" style="margin-top:12px"></div>`;
+  drawChart(s, DATA.chart_dates, DATA.params.window);
+  el.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function drawChart(s, dates, win){
+  const box = $("#chart"); const W = Math.max(320, box.clientWidth), pad = 46, H1 = 150, H2 = 80, gap = 18;
+  const H = H1 + H2*2 + gap*2 + 24;
+  const n = dates.length, x = i => pad + (W - pad - 10) * i / Math.max(1, n-1);
+  const css = getComputedStyle(document.documentElement);
+  function panel(vals, top, h, color, label, kind){
+    const v = vals.filter(a => a != null); if (!v.length) return "";
+    let lo = Math.min(...v), hi = Math.max(...v); if (lo === hi) { lo -= 1; hi += 1; }
+    const y = a => top + h - (a - lo) / (hi - lo) * h;
+    let path = ""; vals.forEach((a,i) => { if (a != null) path += (path ? "L" : "M") + x(i).toFixed(1) + "," + y(a).toFixed(1); });
+    let zero = "";
+    if (kind === "net" && lo < 0 && hi > 0) zero = `<line x1="${pad}" x2="${W-10}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)" stroke-dasharray="3 3"/>`;
+    return `<text x="${pad+4}" y="${top+10}" style="font-weight:700">${label}</text>
+      <text x="${pad-4}" y="${top+10}" text-anchor="end">${short(hi)}</text>
+      <text x="${pad-4}" y="${top+h}" text-anchor="end">${short(lo)}</text>
+      <line x1="${pad}" x2="${W-10}" y1="${top+h}" y2="${top+h}" stroke="var(--line)"/>
+      ${zero}<path d="${path}" fill="none" stroke="${color}" stroke-width="1.8"/>`;
+  }
+  function short(a){ const b = Math.abs(a); return b >= 1e8 ? (a/1e8).toFixed(1)+"억" : b >= 1e4 ? (a/1e4).toFixed(0)+"만" : fmt(a, b<10?1:0); }
+  const winStart = x(Math.max(0, n - win));
+  const top2 = H1 + gap, top3 = H1 + H2 + gap*2;
+  const lbl = [0, Math.floor(n/2), n-1].map(i => `<text x="${x(i)}" y="${H-4}" text-anchor="${i===0?'start':i===n-1?'end':'middle'}">${dates[i].slice(4,6)}.${dates[i].slice(6)}</text>`).join("");
+  box.innerHTML = `<svg width="100%" viewBox="0 0 ${W} ${H}" role="img" aria-label="주가, OBV, 외국인과 기관 누적 순매수 차트">
+    <rect x="${winStart}" y="0" width="${W-10-winStart}" height="${H-20}" fill="var(--chip)" opacity=".7"/>
+    <text x="${winStart+4}" y="${H-22}">판단 기간</text>
+    ${panel(s.c, 4, H1-4, "var(--ink)", "주가")}
+    ${panel(s.obv, top2, H2, "var(--obv)", "OBV")}
+    ${panel(s.net, top3, H2, "var(--flow)", "외인+기관(억)", "net")}
+    ${lbl}</svg>`;
+}
+
+function renderBT(){
+  const b = DATA.backtest; const el = $("#bt");
+  if (!b || !b.rows.length) { el.innerHTML = `<h3>과거에 같은 규칙으로 골랐다면</h3><p class="meta">자료가 더 쌓이면 보여 드립니다.</p>`; return; }
+  const sum = Object.entries(b.summary).map(([h,v]) => `
+    <div class="kpi"><b>${h}거래일 뒤</b>
+      <em class="${sgn(v.avg_pick - v.avg_market)}">${v.avg_pick>0?"+":""}${v.avg_pick}%</em>
+      <small>같은 날 전체 종목 중앙값 ${v.avg_market>0?"+":""}${v.avg_market}% · ${v.times}번 중 ${v.beat_ratio}% 시점에서 앞섬</small></div>`).join("");
+  const rows = b.rows.slice().reverse().map(r => `<tr>
+    <td class="l">${r.date.slice(0,4)}.${r.date.slice(4,6)}.${r.date.slice(6)}</td>
+    ${b.hold.map(h => `<td class="${sgn((r['r'+h]??0)-(r['m'+h]??0))}">${r['r'+h]==null?"-":r['r'+h]+"%"}</td><td class="hide-m">${r['m'+h]==null?"-":r['m'+h]+"%"}</td>`).join("")}
+  </tr>`).join("");
+  el.innerHTML = `<h3>과거에 같은 규칙으로 골랐다면</h3>
+    <p class="meta" style="margin:0 0 10px">각 시점의 상위 ${b.top}종목을 샀다고 치고, 그 뒤 평균 수익률을 같은 날 전체 종목의 중앙값과 비교했습니다. 수수료·세금은 빼지 않았고, 지나간 결과가 앞으로도 같으리라는 보장은 없습니다.</p>
+    <div class="bt-sum">${sum}</div>
+    <div class="tbl"><table><thead><tr><th class="l">신호일</th>${b.hold.map(h=>`<th>${h}일 뒤 후보</th><th class="hide-m">${h}일 뒤 시장</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+window.addEventListener("resize", () => { if (selected) drawChart(DATA.series[selected], DATA.chart_dates, DATA.params.window); });
+</script>
+</body>
+</html>

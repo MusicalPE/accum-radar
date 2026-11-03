@@ -1,0 +1,55 @@
+name: 매일 매집 레이더 갱신
+
+on:
+  schedule:
+    # 평일 한국시간 18:47 (투자자별 매매 확정치가 18시 이후에 나옴). cron 은 UTC 기준
+    - cron: "47 9 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "최근 며칠치(평일)를 채울지. 처음엔 130 정도"
+        required: false
+        default: "3"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: radar
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 라이브러리 설치
+        run: pip install -r requirements.txt
+
+      - name: 자료 모으기
+        env:
+          KRX_ID: ${{ secrets.KRX_ID }}
+          KRX_PW: ${{ secrets.KRX_PW }}
+        run: python screener/collect.py --days "${{ github.event.inputs.days || '3' }}"
+
+      - name: 분석하기
+        run: python screener/analyze.py
+
+      - name: 결과 저장
+        run: |
+          git config user.name "radar-bot"
+          git config user.email "radar-bot@users.noreply.github.com"
+          git add data docs/data
+          if git diff --cached --quiet; then
+            echo "바뀐 내용 없음"
+          else
+            git commit -m "자료 갱신 $(TZ=Asia/Seoul date +%Y-%m-%d)"
+            git push
+          fi
