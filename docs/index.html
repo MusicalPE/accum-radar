@@ -95,6 +95,11 @@ h3{font-size:16px;margin:0 0 8px}
 details summary{cursor:pointer;color:var(--sub);font-size:13px}
 details p,details li{font-size:13px;color:var(--sub)}
 .small{font-size:12px;color:var(--sub)}
+#tip{position:fixed;z-index:50;max-width:280px;background:var(--ink);color:var(--bg);font-size:12px;line-height:1.55;padding:8px 10px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.18);pointer-events:none;opacity:0;transition:opacity .12s;white-space:normal;text-align:left;font-weight:400}
+#tip.on{opacity:1}
+[data-tip]{cursor:help}
+th[data-tip]{text-decoration:underline dotted var(--sub);text-underline-offset:3px}
+.legend [data-tip]{border-bottom:1px dotted var(--sub)}
 footer{color:var(--sub);font-size:12px;text-align:center;margin-top:30px}
 @media (max-width:720px){
   .grid,.weights{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -114,9 +119,9 @@ footer{color:var(--sub);font-size:12px;text-align:center;margin-top:30px}
 
   <div class="card">
     <div class="controls">
-      <span class="lbl">판단 기간</span>
+      <span class="lbl" data-tip="최근 며칠의 움직임으로 판단할지 고릅니다. 20일은 짧고 민감하게, 60일은 길고 묵직하게 봅니다.">판단 기간</span>
       <div class="seg" id="win"></div>
-      <button class="tog" id="wbtn">점수 비중 조절</button>
+      <button class="tog" id="wbtn" data-tip="네 가지 점수 중 무엇을 더 중요하게 볼지 바꿔 봅니다. 예를 들어 수급을 크게 하면 외국인·기관이 산 종목이 위로 올라옵니다.">점수 비중 조절</button>
     </div>
     <div class="weights" id="weights"></div>
 
@@ -137,32 +142,32 @@ footer{color:var(--sub);font-size:12px;text-align:center;margin-top:30px}
         <input type="search" id="q" placeholder="종목명·코드 찾기">
       </div>
       <div class="controls">
-        <button class="tog" data-f="newOnly">신규만</button>
-        <button class="tog" data-f="stay5">5일 이상 유지</button>
-        <button class="tog" data-f="profit">흑자(PER 있음)</button>
-        <button class="tog" data-f="pbr1">PBR 1 이하</button>
-        <button class="tog" data-f="flow">외인+기관 순매수</button>
+        <button class="tog" data-f="newOnly" data-tip="어제는 상위 30위 밖이었는데 오늘 들어온 종목만 봅니다.">신규만</button>
+        <button class="tog" data-f="stay5" data-tip="상위 30위 안에 5일 이상 연속으로 머문 종목만 봅니다.">5일 이상 유지</button>
+        <button class="tog" data-f="profit" data-tip="PER이 있는(이익을 내는) 종목만 봅니다. 적자 종목을 걸러 냅니다.">흑자(PER 있음)</button>
+        <button class="tog" data-f="pbr1" data-tip="회사 순자산보다 싸거나 비슷하게 거래되는 종목만 봅니다.">PBR 1 이하</button>
+        <button class="tog" data-f="flow" data-tip="판단 기간 동안 외국인+기관이 산 쪽이 더 많은 종목만 봅니다.">외인+기관 순매수</button>
       </div>
       <div class="legend">
-        <span><i style="background:var(--flat)"></i>횡보</span>
-        <span><i style="background:var(--obv)"></i>OBV</span>
-        <span><i style="background:var(--mf)"></i>자금흐름</span>
-        <span><i style="background:var(--flow)"></i>수급</span>
+        <span data-tip="판단 기간 동안 가격이 얼마나 좁은 폭에서 평평하게 움직였는지입니다. 최고가와 최저가 차이가 좁고 추세가 0에 가까울수록 높습니다."><i style="background:var(--flat)"></i>횡보</span>
+        <span data-tip="OBV(누적 거래량): 오른 날 거래량은 더하고 내린 날 거래량은 빼서 쌓은 값입니다. 가격은 그대로인데 OBV가 오르면, 오르는 날에 더 많은 거래(매수)가 몰렸다는 뜻입니다. 표의 %는 기간 거래량 중 매수 쪽으로 쌓인 비율입니다."><i style="background:var(--obv)"></i>OBV</span>
+        <span data-tip="자금흐름: 종가가 그날 고가 근처에서 끝나는 날이 많을수록(CMF, 차이킨 머니플로) 그리고 오른 날 거래량이 내린 날보다 많을수록 높습니다. 장중에 사려는 힘이 더 셌다는 신호입니다."><i style="background:var(--mf)"></i>자금흐름</span>
+        <span data-tip="수급: 외국인과 기관(연기금 포함)이 판단 기간 동안 순매수한 금액이 시가총액에 비해 크고, 순매수한 날이 많을수록 높습니다."><i style="background:var(--flow)"></i>수급</span>
         <span>신규: 어제는 상위 30 밖</span>
       </div>
       <div class="tbl">
         <table>
           <thead><tr>
-            <th class="l" data-k="rank">순위</th>
-            <th class="l" data-k="name">종목</th>
-            <th data-k="score">점수</th>
-            <th data-k="streak">유지</th>
-            <th data-k="range_pct" class="hide-m">가격 폭</th>
-            <th data-k="obv_ratio" class="hide-m">OBV</th>
-            <th data-k="smart">외인+기관(억)</th>
-            <th data-k="per" class="hide-m">PER</th>
-            <th data-k="pbr" class="hide-m">PBR</th>
-            <th data-k="close">종가</th>
+            <th class="l" data-k="rank" data-tip="점수 순위입니다. ▲▼는 어제보다 오르내린 칸 수, 신규는 어제는 상위 30위 밖이었다가 오늘 들어온 종목입니다.">순위</th>
+            <th class="l" data-k="name" data-tip="종목을 누르면 차트와 뽑힌 이유, PER·PBR, 관심 종목·가상 매매 버튼이 아래에 나옵니다.">종목</th>
+            <th data-k="score" data-tip="횡보·OBV·자금흐름·수급 점수를 더한 값(100점 만점)입니다. 막대 색은 각 점수가 차지하는 몫입니다.">점수</th>
+            <th data-k="streak" data-tip="상위 30위 안에 며칠째 연속으로 머물렀는지입니다. 하루 반짝 뜬 종목보다 꾸준히 남아 있는 종목이 더 의미 있을 때가 많습니다.">유지</th>
+            <th data-k="range_pct" class="hide-m" data-tip="판단 기간 중 (최고가 - 최저가) ÷ 평균가입니다. 작을수록 좁은 상자 안에서 움직였다는 뜻입니다.">가격 폭</th>
+            <th data-k="obv_ratio" class="hide-m" data-tip="OBV(누적 거래량): 오른 날 거래량은 더하고 내린 날 거래량은 빼서 쌓은 값입니다. 가격은 그대로인데 OBV가 오르면, 오르는 날에 더 많은 거래(매수)가 몰렸다는 뜻입니다. 표의 %는 기간 거래량 중 매수 쪽으로 쌓인 비율입니다.">OBV</th>
+            <th data-k="smart" data-tip="판단 기간 동안 외국인과 기관이 사고판 금액의 차이(순매수)를 더한 값입니다. 빨간색은 산 쪽이 많았다는 뜻입니다.">외인+기관(억)</th>
+            <th data-k="per" class="hide-m" data-tip="PER(주가수익비율): 주가 ÷ 1주당 순이익. 회사가 버는 돈에 비해 주가가 몇 배인지입니다. 낮을수록 싸게 거래된다는 뜻이고, 비어 있으면 적자이거나 자료가 없습니다.">PER</th>
+            <th data-k="pbr" class="hide-m" data-tip="PBR(주가순자산비율): 주가 ÷ 1주당 순자산. 1보다 작으면 회사가 가진 재산보다 싸게 거래된다는 뜻입니다.">PBR</th>
+            <th data-k="close" data-tip="기준일 장 마감 가격입니다.">종가</th>
             <th></th>
           </tr></thead>
           <tbody id="tb"></tbody>
@@ -196,6 +201,7 @@ footer{color:var(--sub);font-size:12px;text-align:center;margin-top:30px}
   <footer>매일 장 마감 후 자동으로 새로 계산됩니다. 자료: 한국거래소</footer>
 </div>
 
+<div id="tip" role="tooltip"></div>
 <script>
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
@@ -434,7 +440,7 @@ function renderSectors(){
   const maxStrong = Math.max(1, ...s.map(x => x.strong));
   el.innerHTML = `<p class="small" style="margin:0 0 8px">같은 업종의 여러 종목에서 동시에 매집 흔적이 보이면 업종 전체로 돈이 들어오는 신호일 수 있습니다. 업종 이름을 누르면 그 업종 후보만 봅니다.</p>
   <div class="tbl"><table><thead><tr>
-    <th class="l">업종</th><th>60점 이상</th><th>횡보 / 전체</th><th class="hide-m">횡보 종목 평균 점수</th><th>외인+기관(억)</th><th class="hide-m">시총 대비</th><th class="l hide-m">대표 종목</th>
+    <th class="l">업종</th><th data-tip="이 업종에서 점수가 60점 이상인 종목 수입니다. 많을수록 업종 전체에 매집 흔적이 퍼져 있다는 뜻입니다.">60점 이상</th><th data-tip="횡보 조건을 통과한 종목 수 / 거래 조건을 통과한 전체 종목 수">횡보 / 전체</th><th class="hide-m">횡보 종목 평균 점수</th><th data-tip="업종 전체 종목의 외국인+기관 순매수 합계입니다.">외인+기관(억)</th><th class="hide-m" data-tip="업종 순매수 합계 ÷ 업종 시가총액 합계. 업종 크기가 달라도 비교할 수 있게 한 값입니다.">시총 대비</th><th class="l hide-m">대표 종목</th>
   </tr></thead><tbody>${s.map(x => `<tr class="row" data-sec="${esc(x.sector)}">
     <td class="l nm">${esc(x.sector)}</td>
     <td><span class="hbar" style="width:${x.strong/maxStrong*60}px"></span> ${x.strong}</td>
@@ -525,12 +531,34 @@ function renderBT(){
     <h3>점수가 높을수록 정말 나았을까</h3>
     <div class="controls"><span class="lbl">기간</span><div class="seg" id="bth">${Object.keys(b.summary).map(h => `<button data-v="${h}" class="${h===btHold?'on':''}">${h}일 뒤</button>`).join("")}</div></div>
     <p class="small" style="margin:0 0 6px">점수 구간별로, 그 구간 종목의 평균 수익률이 같은 날 시장 중앙값보다 얼마나 높았는지(초과 수익) 평균한 값입니다. 위 구간일수록 초과 수익이 크면 점수가 의미 있다는 뜻입니다.</p>
-    <div class="tbl"><table><thead><tr><th class="l">점수 구간</th><th>시장보다</th><th>앞선 비율</th><th class="hide-m">비교 횟수</th><th class="hide-m">구간 평균 종목 수</th></tr></thead><tbody>${bucketRows}</tbody></table></div>
+    <div class="tbl"><table><thead><tr><th class="l">점수 구간</th><th data-tip="그 점수 구간 종목의 평균 수익률에서 같은 날 전체 종목 중앙값을 뺀 값(초과 수익)의 평균입니다.">시장보다</th><th data-tip="비교한 시점 중 시장 중앙값보다 나았던 시점의 비율입니다.">앞선 비율</th><th class="hide-m">비교 횟수</th><th class="hide-m">구간 평균 종목 수</th></tr></thead><tbody>${bucketRows}</tbody></table></div>
     <h3 style="margin-top:16px">시점별 기록 (최근 ${b.rows.length}번)</h3>
     <div class="tbl"><table><thead><tr><th class="l">신호일</th>${b.hold.map(h=>`<th>${h}일 뒤 후보</th><th class="hide-m">${h}일 뒤 시장</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`;
   $$("#bth button").forEach(x => x.onclick = () => { btHold = x.dataset.v; renderBT(); });
 }
 function BT_STEP_TEXT(){ return "5거래일마다"; }
+
+/* ---------- 설명 말풍선 ---------- */
+(function(){
+  const tip = document.getElementById("tip");
+  let cur = null;
+  function show(el){
+    cur = el; tip.textContent = el.dataset.tip; tip.classList.add("on");
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    let x = Math.min(Math.max(8, r.left + r.width/2 - w/2), innerWidth - w - 8);
+    let y = r.bottom + 8; if (y + h > innerHeight - 8) y = r.top - h - 8;
+    tip.style.left = x + "px"; tip.style.top = y + "px";
+  }
+  function hide(){ cur = null; tip.classList.remove("on"); }
+  const touch = matchMedia("(hover: none)").matches;
+  if (!touch){
+    document.addEventListener("mouseover", e => { const el = e.target.closest("[data-tip]"); if (el && el !== cur) show(el); else if (!el && cur) hide(); });
+  } else {
+    // 휴대폰: 길게 누르거나 제목을 누르면 보이고, 다른 곳을 누르면 사라짐 (정렬·필터 동작은 그대로)
+    document.addEventListener("click", e => { const el = e.target.closest("[data-tip]"); if (el && el !== cur) show(el); else hide(); }, true);
+  }
+  addEventListener("scroll", hide, {passive:true});
+})();
 </script>
 </body>
 </html>
