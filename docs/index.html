@@ -128,7 +128,7 @@ footer{color:var(--sub);font-size:12px;text-align:center;margin-top:30px}
     <details>
       <summary>점수는 이렇게 매깁니다</summary>
       <ul>
-        <li><b>횡보(25)</b> 최근 판단 기간 동안 최고가와 최저가 차이가 좁고(10% 안팎이면 만점), 추세선 기울기가 0에 가까울수록 높습니다.</li>
+        <li><b>횡보(25)</b> 최근 판단 기간 동안 최고가와 최저가 차이가 좁고(10% 안팎이면 만점), 추세선 기울기가 0에 가까울수록 높습니다. 가격 폭이 30%를 넘거나 추세가 ±12%를 넘는 종목은 다른 점수와 관계없이 후보에서 뺍니다.</li>
         <li><b>OBV(25)</b> 오른 날 거래량은 더하고 내린 날 거래량은 빼서 쌓은 값입니다. 기간 거래량의 25% 이상이 꾸준히 쌓이면 만점입니다.</li>
         <li><b>자금흐름(20)</b> 종가가 그날 고가 쪽에서 끝나는 날이 많을수록(CMF) 그리고 오른 날 거래량이 내린 날보다 많을수록 높습니다.</li>
         <li><b>수급(30)</b> 외국인과 기관의 누적 순매수가 시가총액의 1% 이상이고, 순매수한 날이 많을수록 높습니다.</li>
@@ -152,7 +152,7 @@ const sgn = x => x > 0 ? "pos" : x < 0 ? "neg" : "";
 fetch("data/latest.json?ts=" + Date.now()).then(r => r.json()).then(d => {
   DATA = d;
   d.candidates.forEach((c, i) => { c.rank = i + 1; c.smart = (c.net_frgn||0) + (c.net_inst||0); });
-  $("#meta").textContent = `기준일 ${d.date.slice(0,4)}.${d.date.slice(4,6)}.${d.date.slice(6)} · 판단 기간 ${d.params.window}거래일 · 대상 ${fmt(d.universe)}종목 · 갱신 ${d.generated}`;
+  $("#meta").textContent = `기준일 ${d.date.slice(0,4)}.${d.date.slice(4,6)}.${d.date.slice(6)} · 판단 기간 ${d.params.window}거래일 · 대상 ${fmt(d.universe)}종목 중 횡보 ${fmt(d.flat_count ?? d.candidates.length)}종목 · 갱신 ${d.generated}`;
   render(); renderBT();
 }).catch(() => {
   $("#meta").textContent = "";

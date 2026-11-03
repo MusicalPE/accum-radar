@@ -13,6 +13,8 @@ data/daily/*.csv 를 읽어 "가격은 횡보하는데 매집 흔적이 쌓이�
 그리고 같은 규칙을 과거 시점에 적용해 "그때 뽑혔던 종목이 이후 어땠는지"도 함께 계산합니다.
 """
 import json
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 import math
 import datetime as dt
 from pathlib import Path
@@ -34,6 +36,8 @@ BT_TOP = 20              # 과거 검증 때 각 시점 상위 몇 종목을 볼
 BT_HOLD = [5, 20]        # 신호 후 며칠 뒤 수익률을 볼지
 BT_STEP = 5              # 과거 검증 시점 간격(거래일)
 EXCLUDE_WORDS = ["스팩"]  # 이름에 들어가면 제외
+MAX_RANGE = 0.30         # 기간 중 (최고가-최저가)/평균가 가 이보다 크면 '횡보 아님'으로 제외
+MAX_TREND = 0.12         # 추세선으로 본 기간 변화율이 ±12% 를 넘으면 제외
 
 KST = dt.timezone(dt.timedelta(hours=9))
 
@@ -153,7 +157,9 @@ def score_at(piv, info, t):
     s_flow = 0.6 * clip01(np.nan_to_num(net_mcap) / 0.01) + 0.4 * clip01((pos_ratio - 0.5) / 0.25)
 
     total = 25 * s_flat + 25 * s_obv + 20 * s_mf + 30 * s_flow
-    total = np.where(ok, total, np.nan)
+    # 이미 크게 오르거나 내린 종목은 다른 점수가 높아도 후보에서 뺌
+    flat_ok = (range_pct <= MAX_RANGE) & (np.abs(trend_pct) <= MAX_TREND)
+    total = np.where(flat_ok, total, np.nan)
 
     df = pd.DataFrame({
         "score": total,
@@ -165,7 +171,8 @@ def score_at(piv, info, t):
         "net_mcap_pct": net_mcap * 100, "pos_ratio": pos_ratio,
         "close": C[-1], "mcap": mcap, "avg_value": avg_val,
     }, index=tickers)
-    return df.dropna(subset=["score"])
+    # 거래 조건(시총·거래대금 등)을 통과한 종목 전체를 돌려줌. 횡보 조건 탈락은 score 가 NaN
+    return df[ok]
 
 
 def backtest(piv, info, dates):
@@ -176,9 +183,10 @@ def backtest(piv, info, dates):
     rows = []
     for t in range(WINDOW, n - min(BT_HOLD), BT_STEP):
         sc = score_at(piv, info, t)
-        if sc is None or sc.empty:
+        if sc is None or sc["score"].notna().sum() == 0:
             continue
-        top = sc.sort_values("score", ascending=False).head(BT_TOP).index
+        # 비교 기준(시장)은 거래 조건을 통과한 전체 종목
+        top = sc.dropna(subset=["score"]).sort_values("score", ascending=False).head(BT_TOP).index
         row = {"date": dates[t], "count": int(len(top))}
         base = close.iloc[t]
         for h in BT_HOLD:
@@ -239,7 +247,8 @@ def main():
     t = len(dates) - 1
     if t < WINDOW:
         raise SystemExit(f"자료가 {len(dates)}일치뿐입니다. 최소 {WINDOW + 1}일치가 필요합니다.")
-    sc = score_at(piv, info, t).sort_values("score", ascending=False)
+    allsc = score_at(piv, info, t)
+    sc = allsc.dropna(subset=["score"]).sort_values("score", ascending=False)
     top = sc.head(TOP_N)
 
     cands = []
@@ -257,7 +266,8 @@ def main():
         "date": dates[t],
         "generated": dt.datetime.now(KST).strftime("%Y-%m-%d %H:%M"),
         "days_loaded": len(dates),
-        "universe": int(len(sc)),
+        "universe": int(len(allsc)),
+        "flat_count": int(len(sc)),
         "params": {"window": WINDOW, "min_mcap": MIN_MCAP, "min_avg_value": MIN_AVG_VALUE},
         "candidates": cands,
         "chart_dates": chart_dates,
@@ -271,7 +281,7 @@ def main():
     (hist / f"{dates[t]}.json").write_text(json.dumps(
         [{"ticker": c["ticker"], "name": c["name"], "score": c["score"], "close": c["close"]} for c in cands[:30]],
         ensure_ascii=False), encoding="utf-8")
-    print(f"{dates[t]} 분석 완료: 대상 {len(sc)}종목, 상위 {len(cands)}종목 저장")
+    print(f"{dates[t]} 분석 완료: 대상 {len(allsc)}종목, 횡보 통과 {len(sc)}종목, 상위 {len(cands)}종목 저장")
 
 
 if __name__ == "__main__":
