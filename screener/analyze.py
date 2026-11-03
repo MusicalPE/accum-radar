@@ -46,6 +46,21 @@ BT_HOLD = [5, 20, 60]    # 신호 후 며칠 뒤 수익률을 볼지
 BT_STEP = 5              # 과거 검증 시점 간격(거래일)
 BUCKETS = [(80, 101, "80점 이상"), (70, 80, "70~79점"), (60, 70, "60~69점"), (50, 60, "50~59점"), (0, 50, "50점 미만")]
 
+# 점수별 따로 검증: (열 이름, 화면 이름, 클수록 좋은지)
+FACTORS = [
+    ("score", "종합 점수", True),
+    ("s_flat", "횡보 점수", True),
+    ("s_obv", "OBV 점수", True),
+    ("s_mf", "자금흐름 점수", True),
+    ("s_flow", "수급 점수", True),
+    ("range_pct", "가격 폭 (좁을수록)", False),
+    ("obv_ratio", "OBV 비율", True),
+    ("cmf", "CMF", True),
+    ("net_mcap_pct", "외인+기관 순매수 (시총 대비)", True),
+    ("pos_ratio", "외인+기관 순매수한 날 비율", True),
+]
+FACTOR_Q = 0.2           # 상위·하위 몇 % 끼리 비교할지
+
 KST = dt.timezone(dt.timedelta(hours=9))
 WEIGHTS = {"s_flat": 25, "s_obv": 25, "s_mf": 20, "s_flow": 30}
 
@@ -219,6 +234,7 @@ def backtest(piv, info, dates, W):
     n = len(dates)
     rows = []
     bucket_acc = {h: {b[2]: [] for b in BUCKETS} for h in BT_HOLD}
+    fac_acc = {h: {f[0]: {"top": [], "bot": [], "ic": []} for f in FACTORS} for h in BT_HOLD}
     for t in range(W, n - min(BT_HOLD), BT_STEP):
         sc = score_at(piv, info, t, W)
         if sc is None:
@@ -244,6 +260,21 @@ def backtest(piv, info, dates, W):
                 sel = fr[(r["score"] >= lo) & (r["score"] < hi)].dropna()
                 if len(sel):
                     bucket_acc[h][label].append((float(sel.mean() - mkt) * 100, len(sel)))
+            # 횡보 통과 종목 안에서 지표 하나만 보고 상위 20% / 하위 20% 를 나눠 비교
+            ex = (fr - mkt).dropna()
+            if len(ex) >= 25:
+                for col, _, higher in FACTORS:
+                    v = r[col].reindex(ex.index)
+                    if not higher:
+                        v = -v
+                    rk = v.rank(method="first", pct=True)
+                    hi_ex, lo_ex = ex[rk > 1 - FACTOR_Q], ex[rk <= FACTOR_Q]
+                    if len(hi_ex) and len(lo_ex):
+                        fac_acc[h][col]["top"].append(float(hi_ex.mean()) * 100)
+                        fac_acc[h][col]["bot"].append(float(lo_ex.mean()) * 100)
+                    ic = v.rank().corr(ex.rank())
+                    if not np.isnan(ic):
+                        fac_acc[h][col]["ic"].append(float(ic))
         rows.append(row)
 
     summary = {}
@@ -269,8 +300,32 @@ def backtest(piv, info, dates, W):
                     "times": len(acc),
                     "avg_count": round(float(np.mean([c for _, c in acc])), 1),
                 })
+    factors = {}
+    for h in BT_HOLD:
+        lst = []
+        for col, label, higher in FACTORS:
+            a = fac_acc[h][col]
+            if not a["top"]:
+                continue
+            spread = np.array(a["top"]) - np.array(a["bot"])
+            ic = np.array(a["ic"]) if a["ic"] else np.array([0.0])
+            # 시점끼리 기간이 겹쳐 실제 독립 표본은 더 적으므로, t 값은 보유 기간만큼 줄여서 계산
+            n_eff = max(1.0, len(spread) * BT_STEP / h)
+            sd = spread.std(ddof=1) if len(spread) > 1 else 0
+            t = float(spread.mean() / (sd / math.sqrt(n_eff))) if sd > 0 else 0.0
+            lst.append({
+                "key": col, "label": label,
+                "top": round(float(np.mean(a["top"])), 2),
+                "bot": round(float(np.mean(a["bot"])), 2),
+                "spread": round(float(spread.mean()), 2),
+                "win": round(float((spread > 0).mean() * 100), 1),
+                "ic": round(float(ic.mean()), 3),
+                "t": round(t, 2),
+                "times": int(len(spread)),
+            })
+        factors[str(h)] = lst
     first = rows[0]["date"] if rows else None
-    return {"rows": rows[-40:], "summary": summary, "buckets": buckets,
+    return {"rows": rows[-40:], "summary": summary, "buckets": buckets, "factors": factors, "factor_q": FACTOR_Q,
             "top": BT_TOP, "hold": BT_HOLD, "from": first}
 
 

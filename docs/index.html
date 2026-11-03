@@ -528,15 +528,52 @@ function renderBT(){
     ${b.hold.map(h => `<td class="${sgn((r['r'+h]??0)-(r['m'+h]??0))}">${r['r'+h]==null?"-":r['r'+h]+"%"}</td><td class="hide-m">${r['m'+h]==null?"-":r['m'+h]+"%"}</td>`).join("")}</tr>`).join("");
   el.innerHTML = `<p class="small" style="margin:0 0 10px">${b.from?ymd(b.from):""}부터 ${BT_STEP_TEXT()} 같은 규칙(${W}일, 기본 비중)으로 골랐다면 어땠는지입니다. 수수료·세금은 빼지 않았고, 지나간 결과가 앞으로도 같으리라는 보장은 없습니다. 비교 횟수가 적으면 우연일 가능성이 큽니다.</p>
     <div class="bt-sum">${sum}</div>
+    <div class="controls" style="margin-top:6px"><span class="lbl">신호 후</span><div class="seg" id="bth">${Object.keys(b.summary).map(h => `<button data-v="${h}" class="${h===btHold?'on':''}">${h}일 뒤</button>`).join("")}</div></div>
     <h3>점수가 높을수록 정말 나았을까</h3>
-    <div class="controls"><span class="lbl">기간</span><div class="seg" id="bth">${Object.keys(b.summary).map(h => `<button data-v="${h}" class="${h===btHold?'on':''}">${h}일 뒤</button>`).join("")}</div></div>
     <p class="small" style="margin:0 0 6px">점수 구간별로, 그 구간 종목의 평균 수익률이 같은 날 시장 중앙값보다 얼마나 높았는지(초과 수익) 평균한 값입니다. 위 구간일수록 초과 수익이 크면 점수가 의미 있다는 뜻입니다.</p>
     <div class="tbl"><table><thead><tr><th class="l">점수 구간</th><th data-tip="그 점수 구간 종목의 평균 수익률에서 같은 날 전체 종목 중앙값을 뺀 값(초과 수익)의 평균입니다.">시장보다</th><th data-tip="비교한 시점 중 시장 중앙값보다 나았던 시점의 비율입니다.">앞선 비율</th><th class="hide-m">비교 횟수</th><th class="hide-m">구간 평균 종목 수</th></tr></thead><tbody>${bucketRows}</tbody></table></div>
+    ${factorSection(b)}
     <h3 style="margin-top:16px">시점별 기록 (최근 ${b.rows.length}번)</h3>
     <div class="tbl"><table><thead><tr><th class="l">신호일</th>${b.hold.map(h=>`<th>${h}일 뒤 후보</th><th class="hide-m">${h}일 뒤 시장</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`;
   $$("#bth button").forEach(x => x.onclick = () => { btHold = x.dataset.v; renderBT(); });
 }
 function BT_STEP_TEXT(){ return "5거래일마다"; }
+
+function factorSection(b){
+  const fs = (b.factors || {})[btHold];
+  if (!fs || !fs.length) return "";
+  const q = Math.round((b.factor_q || 0.2) * 100);
+  const sure = t => { const a = Math.abs(t);
+    return a >= 2 ? `<b class="${t>0?'pos':'neg'}">뚜렷함</b>` : a >= 1 ? `<span class="${t>0?'pos':'neg'}">약한 경향</span>` : `<span class="small">차이 없음 수준</span>`; };
+  const maxAbs = Math.max(1, ...fs.map(f => Math.abs(f.spread)));
+  const sign = v => (v>0?"+":"") + v.toFixed(2) + "%";
+  const good = fs.filter(f => f.key !== "score" && f.t >= 1).sort((a,b) => b.t - a.t);
+  const bad = fs.filter(f => f.key !== "score" && f.t <= -1).sort((a,b) => a.t - b.t);
+  const total = fs.find(f => f.key === "score");
+  const lines = [];
+  if (!fs.some(f => Math.abs(f.t) >= 2)) lines.push(`이 기간 자료로는 어느 지표도 우연이라고 보기 어려울 만큼 뚜렷한 차이를 보이지 않았습니다.`);
+  if (good.length) lines.push(`${good.map(f => `<b>${f.label}</b>`).join(", ")}은(는) 높은 쪽이 대체로 더 나았습니다(약한 경향).`);
+  if (bad.length) lines.push(`${bad.map(f => `<b>${f.label}</b>`).join(", ")}은(는) 오히려 높은 쪽이 더 못했습니다.`);
+  if (total) lines.push(`지금 쓰는 종합 점수는 상위 ${q}%와 하위 ${q}%의 차이가 ${sign(total.spread)}입니다.`);
+  return `<h3 style="margin-top:18px">점수 하나씩 따로 보기</h3>
+    <p class="small" style="margin:0 0 6px">횡보 조건을 통과한 종목만 놓고, 지표 하나만 기준으로 상위 ${q}%와 하위 ${q}%로 나눠 ${btHold}거래일 뒤 시장보다 얼마나 나았는지 비교했습니다. "차이"가 플러스로 크고 "믿을 만한 정도"가 뚜렷할수록 쓸모 있는 신호입니다.</p>
+    <ul class="why" style="margin-bottom:10px">${lines.map(l => `<li>${l}</li>`).join("")}</ul>
+    <div class="tbl"><table><thead><tr>
+      <th class="l">지표</th>
+      <th data-tip="이 지표가 가장 높은 ${q}% 종목의 평균 초과 수익(같은 날 시장 중앙값 대비)">상위 ${q}%</th>
+      <th data-tip="이 지표가 가장 낮은 ${q}% 종목의 평균 초과 수익">하위 ${q}%</th>
+      <th data-tip="상위 - 하위. 플러스면 이 지표가 높을수록 나았다는 뜻입니다.">차이</th>
+      <th class="hide-m" data-tip="비교한 시점 중 상위가 하위보다 나았던 시점의 비율. 50% 근처면 동전 던지기와 비슷합니다.">상위가 앞선 비율</th>
+      <th data-tip="차이가 우연일 가능성을 따져 본 값입니다. 시점끼리 기간이 겹치는 점을 감안해 보수적으로 계산했습니다. 뚜렷함(2 이상) / 약한 경향(1~2) / 차이 없음 수준(1 미만)">믿을 만한 정도</th>
+    </tr></thead><tbody>${fs.map(f => `<tr${f.key==="score"?' style="font-weight:700"':''}>
+      <td class="l">${f.label}</td>
+      <td class="${sgn(f.top)}">${sign(f.top)}</td>
+      <td class="${sgn(f.bot)}">${sign(f.bot)}</td>
+      <td class="${sgn(f.spread)}"><span class="hbar" style="width:${Math.abs(f.spread)/maxAbs*50}px;background:var(${f.spread>=0?'--up':'--down'})"></span> ${sign(f.spread)}</td>
+      <td class="hide-m">${f.win}%</td>
+      <td>${sure(f.t)} <span class="small">(${f.t>0?"+":""}${f.t})</span></td>
+    </tr>`).join("")}</tbody></table></div>`;
+}
 
 /* ---------- 설명 말풍선 ---------- */
 (function(){
