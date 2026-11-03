@@ -14,9 +14,10 @@
 
 ## 구성
 
-- screener/collect.py: 하루치 전 종목 시세·시가총액·투자자별 순매수 수집 (data/daily)
+- screener/collect.py: 하루치 전 종목 시세·시가총액·투자자별 순매수(data/daily), 최근 업종·PER·PBR(data/meta.csv) 수집
 - screener/analyze.py: 점수 계산과 과거 검증 (docs/data/latest.json). 조건 숫자는 파일 위쪽에서 바꿀 수 있음
-- docs/index.html: 결과 화면
+- screener/notify.py: 갱신 후 텔레그램 알림 (설정했을 때만)
+- docs/index.html: 결과 화면 (판단 기간·점수 비중 바꾸기, 업종별 보기, 관심 종목, 가상 매매 일지, 과거 검증)
 - .github/workflows/daily.yml: 매일 자동 실행
 
 ## 필요한 설정
@@ -25,3 +26,4 @@
 
 - KRX_ID
 - KRX_PW
+- TELEGRAM_TOKEN, TELEGRAM_CHAT_ID (알림을 받을 때만)

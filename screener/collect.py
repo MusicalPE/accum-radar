@@ -2,7 +2,8 @@
 매집 레이더 - 데이터 수집
 
 한국거래소(KRX) 데이터를 pykrx 로 받아 하루에 파일 하나씩 저장합니다.
-  data/daily/YYYYMMDD.csv
+  data/daily/YYYYMMDD.csv.gz  (하루치 시세·수급)
+  data/meta.csv               (가장 최근 날의 업종·PER·PBR·배당)
 
 받는 것 (코스피 + 코스닥 전 종목)
   - 시가/고가/저가/종가/거래량/거래대금
@@ -15,7 +16,7 @@ KRX 정보데이터시스템이 회원제로 바뀌어 로그인이 필요합니
 
 사용법
   python screener/collect.py              # 오늘(또는 가장 최근 영업일) 하루
-  python screener/collect.py --days 130   # 최근 130일치 중 없는 날만 채우기
+  python screener/collect.py --days 500   # 최근 500일치(약 2년) 중 없는 날만 채우기
   python screener/collect.py --date 20261103
 """
 import argparse
@@ -29,7 +30,8 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
 DAILY_DIR = ROOT / "data" / "daily"
-KEEP_DAYS = 200          # 이보다 오래된 일별 파일은 지워서 저장소가 커지지 않게
+KEEP_DAYS = 520          # 약 2년치. 이보다 오래된 일별 파일은 지워서 저장소가 커지지 않게
+META_PATH = ROOT / "data" / "meta.csv"
 MARKETS = ["KOSPI", "KOSDAQ"]
 INVESTORS = {"외국인": "frgn_net", "기관합계": "inst_net", "연기금": "pension_net"}
 KST = dt.timezone(dt.timedelta(hours=9))
@@ -111,11 +113,51 @@ def business_days_back(n: int, end: dt.date):
     return list(reversed(out))
 
 
+def fetch_meta(day: str) -> pd.DataFrame | None:
+    """업종 분류와 PER·PBR·배당수익률 (가장 최근 날 하루치만)."""
+    from pykrx import stock
+
+    frames = []
+    for mkt in MARKETS:
+        part = pd.DataFrame()
+        try:
+            sec = retry(stock.get_market_sector_classifications, day, mkt)
+            if sec is not None and not sec.empty:
+                part = pd.DataFrame({"sector": sec["업종명"]})
+        except Exception as e:
+            log(f"  업종 분류를 받지 못했습니다({mkt}): {e}")
+        try:
+            fu = retry(stock.get_market_fundamental_by_ticker, day, mkt)
+            if fu is not None and not fu.empty:
+                fu = fu.rename(columns={"PER": "per", "PBR": "pbr", "DIV": "div", "EPS": "eps", "BPS": "bps"})
+                part = part.join(fu[["per", "pbr", "div", "eps", "bps"]], how="outer")
+        except Exception as e:
+            log(f"  PER·PBR 을 받지 못했습니다({mkt}): {e}")
+        if not part.empty:
+            frames.append(part)
+        time.sleep(1)
+    if not frames:
+        return None
+    df = pd.concat(frames)
+    df.index.name = "ticker"
+    df["date"] = day
+    return df
+
+
+def daily_path(key: str) -> Path:
+    return DAILY_DIR / f"{key}.csv.gz"
+
+
 def prune():
-    files = sorted(DAILY_DIR.glob("*.csv"))
+    files = sorted(list(DAILY_DIR.glob("*.csv")) + list(DAILY_DIR.glob("*.csv.gz")), key=lambda f: f.name[:8])
     for f in files[:-KEEP_DAYS]:
         f.unlink()
         log("오래된 파일 삭제:", f.name)
+    if files[:-KEEP_DAYS]:
+        oldest = files[-KEEP_DAYS].name[:8]
+        for h in DAILY_DIR.glob("*.holiday"):
+            if h.stem < oldest:
+                h.unlink()
 
 
 def main():
@@ -145,29 +187,53 @@ def main():
             end -= dt.timedelta(days=1)
         days = business_days_back(args.days, end)
 
-    got = 0
+    got, fails, streak = 0, 0, 0
     for d in days:
         key = d.strftime("%Y%m%d")
-        path = DAILY_DIR / f"{key}.csv"
+        path = daily_path(key)
+        old_plain = DAILY_DIR / f"{key}.csv"
         holiday_mark = DAILY_DIR / f"{key}.holiday"
-        if not args.force and (path.exists() or holiday_mark.exists()):
+        if not args.force and (path.exists() or old_plain.exists() or holiday_mark.exists()):
             continue
         log(f"{key} 수집 중...")
-        df = fetch_day(key)
+        try:
+            df = fetch_day(key)
+        except Exception as e:
+            # 하루 실패로 긴 수집 전체를 버리지 않도록 건너뛰고 계속. 다음 실행 때 다시 시도됨
+            fails += 1
+            streak += 1
+            log(f"  {key}: 실패 ({e})")
+            if streak >= 5:
+                log("연속 5번 실패해서 멈춥니다. 지금까지 받은 자료는 저장됩니다.")
+                break
+            continue
+        streak = 0
         if df is None:
             log(f"  {key}: 휴장일(또는 자료 없음)")
             if d < now.date():
                 holiday_mark.write_text("")
             continue
-        df.to_csv(path, encoding="utf-8")
+        df.to_csv(path, encoding="utf-8", compression="gzip")
+        if old_plain.exists():
+            old_plain.unlink()
         got += 1
         log(f"  {key}: {len(df)} 종목 저장")
 
+    # 업종·PER·PBR 은 가장 최근에 자료가 있는 날 기준으로 매번 새로 받음
+    latest = sorted(f.name[:8] for f in list(DAILY_DIR.glob("*.csv.gz")) + list(DAILY_DIR.glob("*.csv")))
+    if latest:
+        try:
+            meta = fetch_meta(latest[-1])
+            if meta is not None:
+                meta.to_csv(META_PATH, encoding="utf-8")
+                log(f"업종·기본지표 저장: {len(meta)} 종목 ({latest[-1]})")
+        except Exception as e:
+            log(f"업종·기본지표를 받지 못했습니다: {e}")
+
     prune()
-    log(f"끝. 새로 받은 날: {got}")
-    if got == 0 and args.days == 1 and not args.date:
-        # 휴장일이어도 실패로 보지 않음
-        sys.exit(0)
+    log(f"끝. 새로 받은 날: {got}, 실패: {fails}")
+    if fails and got == 0:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

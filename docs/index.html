@@ -10,55 +10,75 @@
 :root{
   --bg:#f6f7f9; --card:#ffffff; --ink:#1b1f24; --sub:#5d6670; --line:#e3e6ea;
   --accent:#0f766e; --flat:#64748b; --obv:#2563eb; --mf:#d97706; --flow:#0f766e;
-  --up:#d6336c; --down:#1c7ed6; --chip:#eef2f5;
+  --up:#d6336c; --down:#1c7ed6; --chip:#eef2f5; --star:#f59f00;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#111418; --card:#1a1f25; --ink:#e7ebef; --sub:#9aa4ae; --line:#2b323a;
     --accent:#2dd4bf; --flat:#94a3b8; --obv:#60a5fa; --mf:#fbbf24; --flow:#2dd4bf;
-    --up:#f06595; --down:#4dabf7; --chip:#242b33;
+    --up:#f06595; --down:#4dabf7; --chip:#242b33; --star:#ffd43b;
   }
 }
 :root[data-theme="dark"]{
   --bg:#111418; --card:#1a1f25; --ink:#e7ebef; --sub:#9aa4ae; --line:#2b323a;
   --accent:#2dd4bf; --flat:#94a3b8; --obv:#60a5fa; --mf:#fbbf24; --flow:#2dd4bf;
-  --up:#f06595; --down:#4dabf7; --chip:#242b33;
+  --up:#f06595; --down:#4dabf7; --chip:#242b33; --star:#ffd43b;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif;font-size:15px;line-height:1.5}
-.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 60px}
+button{font:inherit}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 16px 60px}
 header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px;margin-bottom:14px}
 h1{font-size:24px;margin:0;letter-spacing:-.5px}
 h1 span{color:var(--accent)}
 .meta{color:var(--sub);font-size:13px}
 .note{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--mf);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--sub);margin-bottom:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+.tabs{display:flex;gap:4px;overflow-x:auto;margin-bottom:12px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;color:var(--sub);padding:8px 12px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;font-size:14px}
+.tabs button.on{color:var(--ink);font-weight:700;border-bottom-color:var(--accent)}
 .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.seg button{border:0;background:transparent;color:var(--sub);padding:6px 12px;font:inherit;font-size:13px;cursor:pointer}
+.seg button{border:0;background:transparent;color:var(--sub);padding:6px 11px;font-size:13px;cursor:pointer}
 .seg button.on{background:var(--accent);color:#fff}
-input[type=search]{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;min-width:140px}
+.lbl{font-size:12px;color:var(--sub)}
+input[type=search],select,input[type=number]{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 10px;font:inherit;font-size:13px}
+input[type=search]{min-width:140px}
+.tog{border:1px solid var(--line);background:var(--card);color:var(--sub);border-radius:16px;padding:5px 11px;font-size:12px;cursor:pointer}
+.tog.on{border-color:var(--accent);color:var(--accent);font-weight:700}
 .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--sub)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.weights{display:none;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;background:var(--chip);border-radius:8px;padding:10px;margin:8px 0}
+.weights.open{display:grid}
+.weights label{font-size:12px;color:var(--sub);display:block}
+.weights input{width:100%}
+.weights b{color:var(--ink)}
 .tbl{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
-th{position:sticky;top:0;background:var(--card);text-align:right;color:var(--sub);font-weight:500;padding:8px 6px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none}
+th{background:var(--card);text-align:right;color:var(--sub);font-weight:500;padding:8px 6px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none}
 th.l,td.l{text-align:left}
 td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
 tr.row{cursor:pointer}
-tr.row:hover td{background:var(--chip)}
-tr.sel td{background:var(--chip)}
+tr.row:hover td,tr.sel td{background:var(--chip)}
 .nm{font-weight:500}
 .code{color:var(--sub);font-size:11px;margin-left:4px}
-.mk{font-size:11px;padding:1px 6px;border-radius:10px;background:var(--chip);color:var(--sub)}
-.bar{display:flex;height:8px;width:110px;border-radius:4px;overflow:hidden;background:var(--chip);margin-left:auto}
+.mk,.sec{font-size:11px;padding:1px 6px;border-radius:10px;background:var(--chip);color:var(--sub);margin-left:4px}
+.new{font-size:10px;font-weight:700;color:#fff;background:var(--up);border-radius:4px;padding:0 4px;margin-left:4px}
+.chg{font-size:11px;margin-left:4px}
+.bar{display:flex;height:8px;width:100px;border-radius:4px;overflow:hidden;background:var(--chip);margin-left:auto}
 .bar span{display:block;height:100%}
 .sc{font-weight:700;margin-right:6px}
 .pos{color:var(--up)} .neg{color:var(--down)}
+.star{border:0;background:none;cursor:pointer;font-size:16px;color:var(--line);padding:0 4px;line-height:1}
+.star.on{color:var(--star)}
+.more{display:block;margin:10px auto 0;border:1px solid var(--line);background:var(--card);color:var(--sub);border-radius:8px;padding:6px 16px;cursor:pointer}
 #detail{display:none}
 .dhead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:baseline}
 .dhead h2{margin:0;font-size:20px}
 .dhead a{color:var(--accent);font-size:13px}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
 .kpi{background:var(--chip);border-radius:8px;padding:8px 10px}
 .kpi b{display:block;font-size:12px;color:var(--sub);font-weight:500}
@@ -67,13 +87,17 @@ tr.sel td{background:var(--chip)}
 svg text{fill:var(--sub);font-size:10px;font-family:inherit}
 .why{font-size:13px;color:var(--sub);margin:6px 0 0;padding-left:18px}
 h3{font-size:16px;margin:0 0 8px}
-.bt-sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
-.empty{color:var(--sub);text-align:center;padding:40px 0}
+.bt-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.empty{color:var(--sub);text-align:center;padding:30px 0}
+.pane{display:none}
+.pane.on{display:block}
+.hbar{height:6px;border-radius:3px;background:var(--accent);display:inline-block;vertical-align:middle}
 details summary{cursor:pointer;color:var(--sub);font-size:13px}
 details p,details li{font-size:13px;color:var(--sub)}
+.small{font-size:12px;color:var(--sub)}
 footer{color:var(--sub);font-size:12px;text-align:center;margin-top:30px}
 @media (max-width:720px){
-  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid,.weights{grid-template-columns:repeat(2,minmax(0,1fr))}
   .bt-sum{grid-template-columns:1fr}
   .hide-m{display:none}
 }
@@ -90,50 +114,82 @@ footer{color:var(--sub);font-size:12px;text-align:center;margin-top:30px}
 
   <div class="card">
     <div class="controls">
-      <div class="seg" id="mkt">
-        <button data-v="ALL" class="on">전체</button><button data-v="KOSPI">코스피</button><button data-v="KOSDAQ">코스닥</button>
+      <span class="lbl">판단 기간</span>
+      <div class="seg" id="win"></div>
+      <button class="tog" id="wbtn">점수 비중 조절</button>
+    </div>
+    <div class="weights" id="weights"></div>
+
+    <div class="tabs" id="tabs">
+      <button data-p="cands" class="on">후보 종목</button>
+      <button data-p="sectors">업종별</button>
+      <button data-p="watch">관심 종목</button>
+      <button data-p="paper">가상 매매</button>
+      <button data-p="bt">과거 검증</button>
+    </div>
+
+    <div class="pane on" id="p-cands">
+      <div class="controls">
+        <div class="seg" id="mkt">
+          <button data-v="ALL" class="on">전체</button><button data-v="KOSPI">코스피</button><button data-v="KOSDAQ">코스닥</button>
+        </div>
+        <select id="secsel"><option value="">모든 업종</option></select>
+        <input type="search" id="q" placeholder="종목명·코드 찾기">
       </div>
-      <input type="search" id="q" placeholder="종목명·코드 찾기">
+      <div class="controls">
+        <button class="tog" data-f="newOnly">신규만</button>
+        <button class="tog" data-f="stay5">5일 이상 유지</button>
+        <button class="tog" data-f="profit">흑자(PER 있음)</button>
+        <button class="tog" data-f="pbr1">PBR 1 이하</button>
+        <button class="tog" data-f="flow">외인+기관 순매수</button>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--flat)"></i>횡보</span>
+        <span><i style="background:var(--obv)"></i>OBV</span>
+        <span><i style="background:var(--mf)"></i>자금흐름</span>
+        <span><i style="background:var(--flow)"></i>수급</span>
+        <span>신규: 어제는 상위 30 밖</span>
+      </div>
+      <div class="tbl">
+        <table>
+          <thead><tr>
+            <th class="l" data-k="rank">순위</th>
+            <th class="l" data-k="name">종목</th>
+            <th data-k="score">점수</th>
+            <th data-k="streak">유지</th>
+            <th data-k="range_pct" class="hide-m">가격 폭</th>
+            <th data-k="obv_ratio" class="hide-m">OBV</th>
+            <th data-k="smart">외인+기관(억)</th>
+            <th data-k="per" class="hide-m">PER</th>
+            <th data-k="pbr" class="hide-m">PBR</th>
+            <th data-k="close">종가</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="tb"></tbody>
+        </table>
+      </div>
+      <button class="more" id="more" style="display:none">더 보기</button>
     </div>
-    <div class="legend">
-      <span><i style="background:var(--flat)"></i>횡보 25</span>
-      <span><i style="background:var(--obv)"></i>OBV 25</span>
-      <span><i style="background:var(--mf)"></i>자금흐름 20</span>
-      <span><i style="background:var(--flow)"></i>수급 30</span>
-    </div>
-    <div class="tbl">
-      <table>
-        <thead><tr>
-          <th class="l" data-k="rank">#</th>
-          <th class="l" data-k="name">종목</th>
-          <th data-k="score">점수</th>
-          <th data-k="range_pct">가격 폭</th>
-          <th data-k="trend_pct" class="hide-m">추세</th>
-          <th data-k="obv_ratio">OBV</th>
-          <th data-k="cmf" class="hide-m">CMF</th>
-          <th data-k="smart">외인+기관(억)</th>
-          <th data-k="pos_ratio" class="hide-m">순매수일</th>
-          <th data-k="close">종가</th>
-        </tr></thead>
-        <tbody id="tb"></tbody>
-      </table>
-    </div>
+
+    <div class="pane" id="p-sectors"></div>
+    <div class="pane" id="p-watch"></div>
+    <div class="pane" id="p-paper"></div>
+    <div class="pane" id="p-bt"></div>
   </div>
 
   <div class="card" id="detail"></div>
-
-  <div class="card" id="bt"></div>
 
   <div class="card">
     <details>
       <summary>점수는 이렇게 매깁니다</summary>
       <ul>
-        <li><b>횡보(25)</b> 최근 판단 기간 동안 최고가와 최저가 차이가 좁고(10% 안팎이면 만점), 추세선 기울기가 0에 가까울수록 높습니다. 가격 폭이 30%를 넘거나 추세가 ±12%를 넘는 종목은 다른 점수와 관계없이 후보에서 뺍니다.</li>
-        <li><b>OBV(25)</b> 오른 날 거래량은 더하고 내린 날 거래량은 빼서 쌓은 값입니다. 기간 거래량의 25% 이상이 꾸준히 쌓이면 만점입니다.</li>
-        <li><b>자금흐름(20)</b> 종가가 그날 고가 쪽에서 끝나는 날이 많을수록(CMF) 그리고 오른 날 거래량이 내린 날보다 많을수록 높습니다.</li>
-        <li><b>수급(30)</b> 외국인과 기관의 누적 순매수가 시가총액의 1% 이상이고, 순매수한 날이 많을수록 높습니다.</li>
+        <li><b>횡보</b> 판단 기간 동안 최고가와 최저가 차이가 좁고 추세선 기울기가 0에 가까울수록 높습니다. 가격 폭이 넓거나(40일 기준 30% 초과) 추세가 크면(40일 기준 ±12% 초과) 다른 점수와 관계없이 후보에서 뺍니다. 기간이 짧을수록 기준도 좁아집니다.</li>
+        <li><b>OBV</b> 오른 날 거래량은 더하고 내린 날 거래량은 빼서 쌓은 값입니다. 기간 거래량의 25% 이상이 꾸준히 쌓이면 만점입니다.</li>
+        <li><b>자금흐름</b> 종가가 그날 고가 쪽에서 끝나는 날이 많을수록(CMF), 오른 날 거래량이 내린 날보다 많을수록 높습니다.</li>
+        <li><b>수급</b> 외국인과 기관의 누적 순매수가 시가총액에 비해 크고, 순매수한 날이 많을수록 높습니다.</li>
       </ul>
-      <p>시가총액 500억 미만, 하루 평균 거래대금 5억 미만, 스팩 종목은 제외합니다.</p>
+      <p>기본 비중은 횡보 25, OBV 25, 자금흐름 20, 수급 30입니다. 시가총액 500억 미만, 하루 평균 거래대금 5억 미만, 스팩 종목은 제외합니다. PER·PBR은 한국거래소 자료이며, PER이 비어 있으면 적자이거나 자료가 없는 종목입니다.</p>
+      <p>관심 종목과 가상 매매 기록은 지금 쓰는 이 브라우저에만 저장됩니다. 다른 기기에서는 따로 보입니다.</p>
     </details>
   </div>
 
@@ -142,140 +198,339 @@ footer{color:var(--sub);font-size:12px;text-align:center;margin-top:30px}
 
 <script>
 const $ = s => document.querySelector(s);
-let DATA = null, market = "ALL", query = "", sortKey = "score", sortDir = -1, selected = null;
+const $$ = s => document.querySelectorAll(s);
+const COMP = [["s_flat","횡보","--flat"],["s_obv","OBV","--obv"],["s_mf","자금흐름","--mf"],["s_flow","수급","--flow"]];
+let D = null, W = "40", market = "ALL", sector = "", query = "", sortKey = "rank", sortDir = 1, selected = null, shown = 60;
+let flags = {}, weights = null, btHold = "20";
+
+const store = {
+  get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+};
+let watch = store.get("radar.watch", []);
+let paper = store.get("radar.paper", []);
 
 const fmt = (x, d=0) => x == null ? "-" : Number(x).toLocaleString("ko-KR", {maximumFractionDigits:d, minimumFractionDigits:d});
 const pct = (x, d=1) => x == null ? "-" : (x*100).toFixed(d) + "%";
 const eok = x => x == null ? "-" : fmt(x/1e8, 0);
 const sgn = x => x > 0 ? "pos" : x < 0 ? "neg" : "";
+const ymd = s => `${s.slice(0,4)}.${s.slice(4,6)}.${s.slice(6)}`;
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 fetch("data/latest.json?ts=" + Date.now()).then(r => r.json()).then(d => {
-  DATA = d;
-  d.candidates.forEach((c, i) => { c.rank = i + 1; c.smart = (c.net_frgn||0) + (c.net_inst||0); });
-  $("#meta").textContent = `기준일 ${d.date.slice(0,4)}.${d.date.slice(4,6)}.${d.date.slice(6)} · 판단 기간 ${d.params.window}거래일 · 대상 ${fmt(d.universe)}종목 중 횡보 ${fmt(d.flat_count ?? d.candidates.length)}종목 · 갱신 ${d.generated}`;
-  render(); renderBT();
-}).catch(() => {
+  D = d;
+  W = String(d.default_window || 40);
+  if (!d.windows[W]) W = Object.keys(d.windows)[0];
+  weights = Object.assign({}, d.params.weights);
+  for (const w of Object.values(d.windows)) for (const c of w.candidates) c.smart = (c.net_frgn||0) + (c.net_inst||0);
+  $("#win").innerHTML = Object.keys(d.windows).map(w => `<button data-v="${w}" class="${w===W?'on':''}">${w}일</button>`).join("");
+  $$("#win button").forEach(b => b.onclick = () => { W = b.dataset.v; $$("#win button").forEach(x => x.classList.toggle("on", x===b)); selected = null; $("#detail").style.display="none"; refresh(); });
+  buildWeights();
+  refresh();
+}).catch(err => {
+  console.error(err);
   $("#meta").textContent = "";
-  $("#tb").innerHTML = `<tr><td colspan="10" class="empty">아직 결과가 없습니다. 자료를 처음 모으는 중이면 잠시 뒤에 다시 열어 주세요.</td></tr>`;
+  $("#tb").innerHTML = `<tr><td colspan="11" class="empty">아직 결과가 없습니다. 자료를 처음 모으는 중이면 잠시 뒤에 다시 열어 주세요.</td></tr>`;
 });
 
-document.querySelectorAll("#mkt button").forEach(b => b.onclick = () => {
-  document.querySelectorAll("#mkt button").forEach(x => x.classList.remove("on"));
-  b.classList.add("on"); market = b.dataset.v; render();
+function win(){ return D.windows[W]; }
+
+function refresh(){
+  const w = win();
+  $("#meta").textContent = `기준일 ${ymd(D.date)} · 대상 ${fmt(w.universe)}종목 중 횡보 ${fmt(w.flat_count)}종목 · 갱신 ${D.generated}`;
+  rescore();
+  const secs = [...new Set(w.candidates.map(c => c.sector).filter(Boolean))].sort();
+  $("#secsel").innerHTML = `<option value="">모든 업종</option>` + secs.map(s => `<option ${s===sector?"selected":""}>${esc(s)}</option>`).join("");
+  if (sector && !secs.includes(sector)) sector = "";
+  render(); renderSectors(); renderWatch(); renderPaper(); renderBT();
+}
+
+/* ---------- 점수 비중 ---------- */
+function buildWeights(){
+  $("#weights").innerHTML = COMP.map(([k,n]) => `<label>${n} <b id="wv-${k}">${weights[k]}</b>
+    <input type="range" min="0" max="50" step="5" value="${weights[k]}" data-k="${k}"></label>`).join("") +
+    `<div class="small" style="grid-column:1/-1">비중을 바꾸면 그 비중으로 점수와 순위를 다시 매깁니다(합계를 100점으로 환산). <button class="tog" id="wreset">기본값</button></div>`;
+  $$("#weights input").forEach(i => i.oninput = () => { weights[i.dataset.k] = +i.value; $("#wv-"+i.dataset.k).textContent = i.value; rescore(); render(); renderWatch(); });
+  $("#wreset").onclick = () => { weights = Object.assign({}, D.params.weights); buildWeights(); rescore(); render(); renderWatch(); };
+  $("#wbtn").onclick = () => { $("#weights").classList.toggle("open"); $("#wbtn").classList.toggle("on"); };
+}
+function isDefaultW(){ return COMP.every(([k]) => weights[k] === D.params.weights[k]); }
+function rescore(){
+  const base = D.params.weights, tot = COMP.reduce((a,[k]) => a + weights[k], 0) || 1;
+  const list = win().candidates;
+  for (const c of list){
+    c.view = {};
+    let s = 0;
+    for (const [k] of COMP){ const v = (c[k]||0) / base[k] * weights[k] * 100 / tot; c.view[k] = v; s += v; }
+    c.vscore = s;
+  }
+  const sorted = list.slice().sort((a,b) => b.vscore - a.vscore);
+  sorted.forEach((c,i) => c.vrank = i + 1);
+}
+
+/* ---------- 탭 ---------- */
+$$("#tabs button").forEach(b => b.onclick = () => {
+  $$("#tabs button").forEach(x => x.classList.toggle("on", x===b));
+  $$(".pane").forEach(p => p.classList.toggle("on", p.id === "p-"+b.dataset.p));
 });
-$("#q").oninput = e => { query = e.target.value.trim(); render(); };
-document.querySelectorAll("th[data-k]").forEach(th => th.onclick = () => {
+
+/* ---------- 후보 종목 ---------- */
+$$("#mkt button").forEach(b => b.onclick = () => { $$("#mkt button").forEach(x => x.classList.remove("on")); b.classList.add("on"); market = b.dataset.v; shown = 60; render(); });
+$("#secsel").onchange = e => { sector = e.target.value; shown = 60; render(); };
+$("#q").oninput = e => { query = e.target.value.trim(); shown = 60; render(); };
+$$(".tog[data-f]").forEach(b => b.onclick = () => { flags[b.dataset.f] = !flags[b.dataset.f]; b.classList.toggle("on"); shown = 60; render(); });
+$$("#p-cands th[data-k]").forEach(th => th.onclick = () => {
   const k = th.dataset.k;
-  if (sortKey === k) sortDir *= -1; else { sortKey = k; sortDir = (k === "range_pct" || k === "rank" || k === "name") ? 1 : -1; }
+  if (sortKey === k) sortDir *= -1; else { sortKey = k; sortDir = ["rank","name","range_pct","per","pbr"].includes(k) ? 1 : -1; }
   render();
 });
+$("#more").onclick = () => { shown += 60; render(); };
+
+const isNew = c => c.prev == null || c.prev > D.params.track_top;
+function filtered(){
+  return win().candidates.filter(c =>
+    (market === "ALL" || c.market === market) &&
+    (!sector || c.sector === sector) &&
+    (!query || c.name.includes(query) || c.ticker.includes(query)) &&
+    (!flags.newOnly || (c.rank <= D.params.track_top && isNew(c))) &&
+    (!flags.stay5 || (c.streak||0) >= 5) &&
+    (!flags.profit || (c.per != null && c.per > 0)) &&
+    (!flags.pbr1 || (c.pbr != null && c.pbr <= 1)) &&
+    (!flags.flow || c.smart > 0));
+}
+function val(c, k){
+  if (k === "rank") return c.vrank;
+  if (k === "score") return c.vscore;
+  return c[k];
+}
+function rankCell(c){
+  let chg = "";
+  if (c.rank <= D.params.track_top && isNew(c)) chg = `<span class="new">신규</span>`;
+  else if (c.prev != null && isDefaultW()) {
+    const d = c.prev - c.rank;
+    if (d > 0) chg = `<span class="chg pos">▲${d}</span>`; else if (d < 0) chg = `<span class="chg neg">▼${-d}</span>`;
+  }
+  return `${c.vrank}${chg}`;
+}
+const stay = s => !s ? "-" : s > 30 ? "30일+" : s + "일";
 
 function render(){
-  if (!DATA) return;
-  let rows = DATA.candidates.filter(c => (market === "ALL" || c.market === market) &&
-    (!query || c.name.includes(query) || c.ticker.includes(query)));
+  if (!D) return;
+  let rows = filtered();
   rows.sort((a,b) => {
-    const x = a[sortKey], y = b[sortKey];
-    if (typeof x === "string") return x.localeCompare(y) * sortDir;
-    return ((x ?? -1e18) - (y ?? -1e18)) * sortDir;
+    const x = val(a, sortKey), y = val(b, sortKey);
+    if (typeof x === "string" || typeof y === "string") return String(x??"").localeCompare(String(y??"")) * sortDir;
+    return ((x ?? (sortDir>0?1e18:-1e18)) - (y ?? (sortDir>0?1e18:-1e18))) * sortDir;
   });
-  if (!rows.length) { $("#tb").innerHTML = `<tr><td colspan="10" class="empty">조건에 맞는 종목이 없습니다.</td></tr>`; return; }
-  $("#tb").innerHTML = rows.map(c => `
+  $("#more").style.display = rows.length > shown ? "block" : "none";
+  if (!rows.length) { $("#tb").innerHTML = `<tr><td colspan="11" class="empty">조건에 맞는 종목이 없습니다.</td></tr>`; return; }
+  $("#tb").innerHTML = rows.slice(0, shown).map(c => `
     <tr class="row ${c.ticker===selected?'sel':''}" data-t="${c.ticker}">
-      <td class="l">${c.rank}</td>
-      <td class="l"><span class="nm">${c.name}</span><span class="code">${c.ticker}</span> <span class="mk">${c.market==="KOSPI"?"코스피":"코스닥"}</span></td>
-      <td><div style="display:flex;align-items:center;justify-content:flex-end"><span class="sc">${fmt(c.score,0)}</span>${bar(c)}</div></td>
-      <td>${pct(c.range_pct)}</td>
-      <td class="hide-m ${sgn(c.trend_pct)}">${pct(c.trend_pct)}</td>
-      <td class="${sgn(c.obv_ratio)}">${pct(c.obv_ratio,0)}</td>
-      <td class="hide-m ${sgn(c.cmf)}">${fmt(c.cmf,2)}</td>
+      <td class="l">${rankCell(c)}</td>
+      <td class="l"><span class="nm">${esc(c.name)}</span><span class="code">${c.ticker}</span>${c.sector?`<span class="sec hide-m">${esc(c.sector)}</span>`:""}</td>
+      <td><div style="display:flex;align-items:center;justify-content:flex-end"><span class="sc">${fmt(c.vscore,0)}</span>${bar(c)}</div></td>
+      <td>${stay(c.streak)}</td>
+      <td class="hide-m">${pct(c.range_pct)}</td>
+      <td class="hide-m ${sgn(c.obv_ratio)}">${pct(c.obv_ratio,0)}</td>
       <td class="${sgn(c.smart)}">${eok(c.smart)}</td>
-      <td class="hide-m">${pct(c.pos_ratio,0)}</td>
+      <td class="hide-m">${c.per==null?"-":fmt(c.per,1)}</td>
+      <td class="hide-m">${c.pbr==null?"-":fmt(c.pbr,2)}</td>
       <td>${fmt(c.close)}</td>
+      <td><button class="star ${watch.includes(c.ticker)?'on':''}" data-s="${c.ticker}" aria-label="관심 종목">★</button></td>
     </tr>`).join("");
-  document.querySelectorAll("tr.row").forEach(tr => tr.onclick = () => showDetail(tr.dataset.t));
+  $$("#tb tr.row").forEach(tr => tr.onclick = e => { if (e.target.closest(".star")) return; showDetail(tr.dataset.t); });
+  $$("#tb .star").forEach(b => b.onclick = () => toggleWatch(b.dataset.s));
 }
-
 function bar(c){
-  const p = (v, col) => `<span style="width:${Math.max(0,v)}%;background:var(${col})"></span>`;
-  return `<div class="bar">${p(c.s_flat,"--flat")}${p(c.s_obv,"--obv")}${p(c.s_mf,"--mf")}${p(c.s_flow,"--flow")}</div>`;
+  return `<div class="bar">${COMP.map(([k,,col]) => `<span style="width:${Math.max(0,c.view[k])}%;background:var(${col})"></span>`).join("")}</div>`;
 }
 
+/* ---------- 종목 자세히 ---------- */
+function findCand(tk){ return win().candidates.find(x => x.ticker === tk); }
 function showDetail(tk){
   selected = tk; render();
-  const c = DATA.candidates.find(x => x.ticker === tk);
-  const s = DATA.series[tk];
+  const c = findCand(tk);
   const el = $("#detail");
   el.style.display = "block";
+  if (!c){
+    const p = D.prices[tk];
+    el.innerHTML = `<div class="dhead"><h2>${esc(p?p[0]:tk)} <span class="code">${tk}</span></h2>
+      <a href="https://finance.naver.com/item/main.naver?code=${tk}" target="_blank" rel="noopener">네이버 증권에서 보기</a></div>
+      <p class="small">${W}일 기준으로는 횡보 조건에 들지 않거나 거래 조건(시가총액·거래대금)에 걸린 종목입니다. 종가 ${p?fmt(p[1]):"-"}</p>
+      <div class="btns">${actionBtns(tk)}</div>`;
+    bindActions(tk); el.scrollIntoView({behavior:"smooth", block:"start"}); return;
+  }
   const why = [];
   if (c.s_flat >= 18) why.push(`가격이 ${pct(c.range_pct)} 폭 안에서 움직였고 추세는 ${pct(c.trend_pct)}로 거의 평평합니다.`);
   if (c.s_obv >= 15) why.push(`OBV가 꾸준히 올라 기간 거래량의 ${pct(c.obv_ratio,0)} 정도가 매수 쪽으로 쌓였습니다.`);
   if (c.cmf > 0.05) why.push(`종가가 그날 고가 쪽에서 끝난 날이 많았습니다(CMF ${fmt(c.cmf,2)}).`);
   if (c.smart > 0) why.push(`외국인 ${eok(c.net_frgn)}억, 기관 ${eok(c.net_inst)}억(이 중 연기금 ${eok(c.net_pension)}억) 순매수, 순매수한 날이 ${pct(c.pos_ratio,0)}입니다.`);
   if (c.s_flow < 5) why.push(`외국인·기관 수급 점수는 낮습니다. 거래량 지표만으로 뽑힌 경우라 더 조심해서 보세요.`);
+  if ((c.streak||0) >= 5) why.push(`상위 ${D.params.track_top}위 안에 ${stay(c.streak)} 동안 머물렀습니다.`);
+  if (c.per == null) why.push(`PER이 비어 있습니다. 적자이거나 자료가 없는 종목입니다.`);
   el.innerHTML = `
-    <div class="dhead"><h2>${c.name} <span class="code">${c.ticker}</span></h2>
+    <div class="dhead"><h2>${esc(c.name)} <span class="code">${c.ticker}</span>${c.sector?`<span class="sec">${esc(c.sector)}</span>`:""}</h2>
       <a href="https://finance.naver.com/item/main.naver?code=${c.ticker}" target="_blank" rel="noopener">네이버 증권에서 보기</a></div>
     <div class="grid">
-      <div class="kpi"><b>종합 점수</b><em>${fmt(c.score,0)}</em><small>100점 만점</small></div>
-      <div class="kpi"><b>횡보 · OBV</b><em>${fmt(c.s_flat,0)} · ${fmt(c.s_obv,0)}</em><small>각 25점 만점</small></div>
-      <div class="kpi"><b>자금흐름</b><em>${fmt(c.s_mf,0)}</em><small>20점 만점</small></div>
-      <div class="kpi"><b>수급</b><em>${fmt(c.s_flow,0)}</em><small>30점 만점</small></div>
+      <div class="kpi"><b>점수 · 순위</b><em>${fmt(c.vscore,0)} · ${c.vrank}위</em><small>${W}일 기준</small></div>
+      <div class="kpi"><b>횡보 · OBV · 자금흐름 · 수급</b><em style="font-size:15px">${fmt(c.s_flat,0)} · ${fmt(c.s_obv,0)} · ${fmt(c.s_mf,0)} · ${fmt(c.s_flow,0)}</em><small>기본 비중 25 · 25 · 20 · 30점 만점</small></div>
+      <div class="kpi"><b>PER · PBR</b><em>${c.per==null?"-":fmt(c.per,1)} · ${c.pbr==null?"-":fmt(c.pbr,2)}</em><small>배당수익률 ${c.div==null?"-":fmt(c.div,2)+"%"}</small></div>
+      <div class="kpi"><b>시가총액</b><em>${fmt(c.mcap/1e8,0)}억</em><small>하루 평균 거래대금 ${fmt(c.avg_value/1e8,0)}억</small></div>
     </div>
     <ul class="why">${why.map(w=>`<li>${w}</li>`).join("")}</ul>
+    <div class="btns">${actionBtns(c.ticker)}</div>
     <div id="chart" style="margin-top:12px"></div>`;
-  drawChart(s, DATA.chart_dates, DATA.params.window);
+  bindActions(c.ticker);
+  if (D.series[c.ticker]) drawChart(D.series[c.ticker], D.chart_dates, +W);
+  else $("#chart").innerHTML = `<p class="small">차트는 각 기간 상위 종목만 준비됩니다.</p>`;
   el.scrollIntoView({behavior:"smooth", block:"start"});
+}
+function actionBtns(tk){
+  return `<button class="btn" data-a="watch">${watch.includes(tk)?"관심 종목에서 빼기":"관심 종목에 넣기"}</button>
+    <button class="btn pri" data-a="buy">가상으로 사기 (${ymd(D.date)} 종가)</button>`;
+}
+function bindActions(tk){
+  $$("#detail [data-a]").forEach(b => b.onclick = () => {
+    if (b.dataset.a === "watch") { toggleWatch(tk); showDetail(tk); }
+    if (b.dataset.a === "buy") { addPaper(tk); b.textContent = "가상 매매 탭에 기록했습니다"; b.disabled = true; }
+  });
 }
 
 function drawChart(s, dates, win){
-  const box = $("#chart"); const W = Math.max(320, box.clientWidth), pad = 46, H1 = 150, H2 = 80, gap = 18;
+  const box = $("#chart"); const Wd = Math.max(320, box.clientWidth), pad = 46, H1 = 150, H2 = 80, gap = 18;
   const H = H1 + H2*2 + gap*2 + 24;
-  const n = dates.length, x = i => pad + (W - pad - 10) * i / Math.max(1, n-1);
-  const css = getComputedStyle(document.documentElement);
-  function panel(vals, top, h, color, label, kind){
+  const n = dates.length, x = i => pad + (Wd - pad - 10) * i / Math.max(1, n-1);
+  function short(a){ const b = Math.abs(a); return b >= 1e8 ? (a/1e8).toFixed(1)+"억" : b >= 1e4 ? (a/1e4).toFixed(0)+"만" : fmt(a, b<10?1:0); }
+  function panel(vals, top, h, color, label, zeroLine){
     const v = vals.filter(a => a != null); if (!v.length) return "";
     let lo = Math.min(...v), hi = Math.max(...v); if (lo === hi) { lo -= 1; hi += 1; }
     const y = a => top + h - (a - lo) / (hi - lo) * h;
     let path = ""; vals.forEach((a,i) => { if (a != null) path += (path ? "L" : "M") + x(i).toFixed(1) + "," + y(a).toFixed(1); });
-    let zero = "";
-    if (kind === "net" && lo < 0 && hi > 0) zero = `<line x1="${pad}" x2="${W-10}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)" stroke-dasharray="3 3"/>`;
-    return `<text x="${pad+4}" y="${top+10}" style="font-weight:700">${label}</text>
-      <text x="${pad-4}" y="${top+10}" text-anchor="end">${short(hi)}</text>
-      <text x="${pad-4}" y="${top+h}" text-anchor="end">${short(lo)}</text>
-      <line x1="${pad}" x2="${W-10}" y1="${top+h}" y2="${top+h}" stroke="var(--line)"/>
+    const zero = zeroLine && lo < 0 && hi > 0 ? `<line x1="${pad}" x2="${Wd-10}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)" stroke-dasharray="3 3"/>` : "";
+    return `<text x="${pad+8}" y="${top+12}" style="font-weight:700">${label}</text>
+      <text x="${pad-6}" y="${top+10}" text-anchor="end">${short(hi)}</text>
+      <text x="${pad-6}" y="${top+h}" text-anchor="end">${short(lo)}</text>
+      <line x1="${pad}" x2="${Wd-10}" y1="${top+h}" y2="${top+h}" stroke="var(--line)"/>
       ${zero}<path d="${path}" fill="none" stroke="${color}" stroke-width="1.8"/>`;
   }
-  function short(a){ const b = Math.abs(a); return b >= 1e8 ? (a/1e8).toFixed(1)+"억" : b >= 1e4 ? (a/1e4).toFixed(0)+"만" : fmt(a, b<10?1:0); }
   const winStart = x(Math.max(0, n - win));
   const top2 = H1 + gap, top3 = H1 + H2 + gap*2;
   const lbl = [0, Math.floor(n/2), n-1].map(i => `<text x="${x(i)}" y="${H-4}" text-anchor="${i===0?'start':i===n-1?'end':'middle'}">${dates[i].slice(4,6)}.${dates[i].slice(6)}</text>`).join("");
-  box.innerHTML = `<svg width="100%" viewBox="0 0 ${W} ${H}" role="img" aria-label="주가, OBV, 외국인과 기관 누적 순매수 차트">
-    <rect x="${winStart}" y="0" width="${W-10-winStart}" height="${H-20}" fill="var(--chip)" opacity=".7"/>
+  box.innerHTML = `<svg width="100%" viewBox="0 0 ${Wd} ${H}" role="img" aria-label="주가, OBV, 외국인과 기관 누적 순매수 차트">
+    <rect x="${winStart}" y="0" width="${Wd-10-winStart}" height="${H-20}" fill="var(--chip)" opacity=".7"/>
     <text x="${winStart+4}" y="${H-22}">판단 기간</text>
     ${panel(s.c, 4, H1-4, "var(--ink)", "주가")}
     ${panel(s.obv, top2, H2, "var(--obv)", "OBV")}
-    ${panel(s.net, top3, H2, "var(--flow)", "외인+기관(억)", "net")}
+    ${panel(s.net, top3, H2, "var(--flow)", "외인+기관 누적(억)", true)}
     ${lbl}</svg>`;
 }
+window.addEventListener("resize", () => { if (selected && D.series[selected] && $("#chart")) drawChart(D.series[selected], D.chart_dates, +W); });
 
-function renderBT(){
-  const b = DATA.backtest; const el = $("#bt");
-  if (!b || !b.rows.length) { el.innerHTML = `<h3>과거에 같은 규칙으로 골랐다면</h3><p class="meta">자료가 더 쌓이면 보여 드립니다.</p>`; return; }
-  const sum = Object.entries(b.summary).map(([h,v]) => `
-    <div class="kpi"><b>${h}거래일 뒤</b>
-      <em class="${sgn(v.avg_pick - v.avg_market)}">${v.avg_pick>0?"+":""}${v.avg_pick}%</em>
-      <small>같은 날 전체 종목 중앙값 ${v.avg_market>0?"+":""}${v.avg_market}% · ${v.times}번 중 ${v.beat_ratio}% 시점에서 앞섬</small></div>`).join("");
-  const rows = b.rows.slice().reverse().map(r => `<tr>
-    <td class="l">${r.date.slice(0,4)}.${r.date.slice(4,6)}.${r.date.slice(6)}</td>
-    ${b.hold.map(h => `<td class="${sgn((r['r'+h]??0)-(r['m'+h]??0))}">${r['r'+h]==null?"-":r['r'+h]+"%"}</td><td class="hide-m">${r['m'+h]==null?"-":r['m'+h]+"%"}</td>`).join("")}
-  </tr>`).join("");
-  el.innerHTML = `<h3>과거에 같은 규칙으로 골랐다면</h3>
-    <p class="meta" style="margin:0 0 10px">각 시점의 상위 ${b.top}종목을 샀다고 치고, 그 뒤 평균 수익률을 같은 날 전체 종목의 중앙값과 비교했습니다. 수수료·세금은 빼지 않았고, 지나간 결과가 앞으로도 같으리라는 보장은 없습니다.</p>
-    <div class="bt-sum">${sum}</div>
-    <div class="tbl"><table><thead><tr><th class="l">신호일</th>${b.hold.map(h=>`<th>${h}일 뒤 후보</th><th class="hide-m">${h}일 뒤 시장</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`;
+/* ---------- 업종별 ---------- */
+function renderSectors(){
+  const s = win().sectors || [];
+  const el = $("#p-sectors");
+  if (!s.length){ el.innerHTML = `<p class="empty">업종 자료가 아직 없습니다. 다음 자동 갱신 때부터 보입니다.</p>`; return; }
+  const maxStrong = Math.max(1, ...s.map(x => x.strong));
+  el.innerHTML = `<p class="small" style="margin:0 0 8px">같은 업종의 여러 종목에서 동시에 매집 흔적이 보이면 업종 전체로 돈이 들어오는 신호일 수 있습니다. 업종 이름을 누르면 그 업종 후보만 봅니다.</p>
+  <div class="tbl"><table><thead><tr>
+    <th class="l">업종</th><th>60점 이상</th><th>횡보 / 전체</th><th class="hide-m">횡보 종목 평균 점수</th><th>외인+기관(억)</th><th class="hide-m">시총 대비</th><th class="l hide-m">대표 종목</th>
+  </tr></thead><tbody>${s.map(x => `<tr class="row" data-sec="${esc(x.sector)}">
+    <td class="l nm">${esc(x.sector)}</td>
+    <td><span class="hbar" style="width:${x.strong/maxStrong*60}px"></span> ${x.strong}</td>
+    <td>${x.flat} / ${x.stocks}</td>
+    <td class="hide-m">${x.avg_score==null?"-":fmt(x.avg_score,0)}</td>
+    <td class="${sgn(x.net_eok)}">${fmt(x.net_eok)}</td>
+    <td class="hide-m ${sgn(x.net_mcap_pct)}">${x.net_mcap_pct==null?"-":x.net_mcap_pct.toFixed(2)+"%"}</td>
+    <td class="l hide-m small">${x.names.map(t => esc((findCand(t)||{}).name||t)).join(", ")}</td>
+  </tr>`).join("")}</tbody></table></div>`;
+  $$("#p-sectors tr.row").forEach(tr => tr.onclick = () => {
+    sector = tr.dataset.sec; $("#secsel").value = sector; shown = 60;
+    $$("#tabs button")[0].click(); render();
+  });
 }
-window.addEventListener("resize", () => { if (selected) drawChart(DATA.series[selected], DATA.chart_dates, DATA.params.window); });
+
+/* ---------- 관심 종목 ---------- */
+function toggleWatch(tk){
+  watch = watch.includes(tk) ? watch.filter(x => x !== tk) : [...watch, tk];
+  store.set("radar.watch", watch); render(); renderWatch();
+}
+function renderWatch(){
+  const el = $("#p-watch");
+  if (!watch.length){ el.innerHTML = `<p class="empty">목록의 ★을 누르면 여기에 모입니다.</p>`; return; }
+  el.innerHTML = `<div class="tbl"><table><thead><tr><th class="l">종목</th><th>${W}일 순위</th><th>점수</th><th>유지</th><th>외인+기관(억)</th><th>종가</th><th></th></tr></thead><tbody>
+  ${watch.map(tk => { const c = findCand(tk), p = D.prices[tk];
+    return `<tr class="row" data-t="${tk}"><td class="l"><span class="nm">${esc(c?c.name:(p?p[0]:tk))}</span><span class="code">${tk}</span></td>
+    <td>${c?c.vrank+"위":"<span class='small'>횡보 조건 밖</span>"}</td><td>${c?fmt(c.vscore,0):"-"}</td><td>${c?stay(c.streak):"-"}</td>
+    <td class="${c?sgn(c.smart):""}">${c?eok(c.smart):"-"}</td><td>${p?fmt(p[1]):"-"}</td>
+    <td><button class="star on" data-s="${tk}">★</button></td></tr>`; }).join("")}
+  </tbody></table></div>`;
+  $$("#p-watch tr.row").forEach(tr => tr.onclick = e => { if (e.target.closest(".star")) return; showDetail(tr.dataset.t); });
+  $$("#p-watch .star").forEach(b => b.onclick = () => toggleWatch(b.dataset.s));
+}
+
+/* ---------- 가상 매매 ---------- */
+function addPaper(tk){
+  const p = D.prices[tk]; if (!p) return;
+  const c = findCand(tk);
+  paper.push({id: Date.now(), ticker: tk, name: p[0], date: D.date, price: p[1],
+    note: c ? `${W}일 ${c.vrank}위 · ${fmt(c.vscore,0)}점` : ""});
+  store.set("radar.paper", paper); renderPaper();
+}
+function tradingDaysBetween(a, b){
+  const i = D.chart_dates.indexOf(a), j = D.chart_dates.indexOf(b);
+  return i >= 0 && j >= 0 ? j - i : null;
+}
+function renderPaper(){
+  const el = $("#p-paper");
+  const open = paper.filter(x => !x.sold), done = paper.filter(x => x.sold);
+  const ret = x => { const now = x.sold ? x.sold.price : (D.prices[x.ticker]||[])[1]; return now ? now / x.price - 1 : null; };
+  const avg = arr => { const v = arr.map(ret).filter(r => r != null); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null; };
+  const head = `<p class="small" style="margin:0 0 8px">실제 돈 없이 "이 종목을 그날 종가에 샀다면"을 기록해 두고 결과를 지켜보는 곳입니다. 종목을 누른 뒤 "가상으로 사기"로 추가합니다. 수수료·세금은 빼지 않았습니다.</p>
+  <div class="grid"><div class="kpi"><b>보유 중</b><em>${open.length}개</em><small>평균 ${avg(open)==null?"-":pct(avg(open),2)}</small></div>
+  <div class="kpi"><b>판 것</b><em>${done.length}개</em><small>평균 ${avg(done)==null?"-":pct(avg(done),2)}</small></div></div>`;
+  if (!paper.length){ el.innerHTML = head + `<p class="empty">아직 기록이 없습니다.</p>`; return; }
+  const row = x => { const r = ret(x), now = x.sold ? x.sold.price : (D.prices[x.ticker]||[])[1];
+    const days = x.sold ? null : tradingDaysBetween(x.date, D.date);
+    return `<tr><td class="l"><span class="nm">${esc(x.name)}</span><span class="code">${x.ticker}</span><div class="small">${esc(x.note||"")}</div></td>
+    <td>${ymd(x.date)}</td><td>${fmt(x.price)}</td><td>${now?fmt(now):"-"}${x.sold?`<div class="small">${ymd(x.sold.date)} 매도</div>`:""}</td>
+    <td class="${sgn(r)}">${r==null?"-":pct(r,2)}</td><td class="hide-m">${days==null?"-":days+"일"}</td>
+    <td>${x.sold?"":`<button class="btn" data-sell="${x.id}">팔기</button>`} <button class="btn" data-del="${x.id}">지우기</button></td></tr>`; };
+  el.innerHTML = head + `<div class="tbl"><table><thead><tr><th class="l">종목</th><th>산 날</th><th>산 값</th><th>지금 / 판 값</th><th>수익률</th><th class="hide-m">보유</th><th></th></tr></thead>
+    <tbody>${[...open, ...done].map(row).join("")}</tbody></table></div>`;
+  $$("[data-sell]").forEach(b => b.onclick = () => { const x = paper.find(p => p.id == b.dataset.sell); const now = (D.prices[x.ticker]||[])[1];
+    if (!now) return; x.sold = {date: D.date, price: now}; store.set("radar.paper", paper); renderPaper(); });
+  $$("[data-del]").forEach(b => b.onclick = () => { if (!confirm("이 기록을 지울까요?")) return; paper = paper.filter(p => p.id != b.dataset.del); store.set("radar.paper", paper); renderPaper(); });
+}
+
+/* ---------- 과거 검증 ---------- */
+function renderBT(){
+  const b = win().backtest; const el = $("#p-bt");
+  if (!b || !b.rows.length) { el.innerHTML = `<p class="empty">자료가 더 쌓이면 보여 드립니다.</p>`; return; }
+  if (!b.summary[btHold]) btHold = Object.keys(b.summary)[0];
+  const sign = v => (v>0?"+":"") + v + "%";
+  const sum = Object.entries(b.summary).map(([h,v]) => `
+    <div class="kpi"><b>${h}거래일 뒤 (상위 ${b.top}종목 평균)</b>
+      <em class="${sgn(v.avg_pick - v.avg_market)}">${sign(v.avg_pick)}</em>
+      <small>같은 날 전체 종목 중앙값 ${sign(v.avg_market)} · ${v.times}번 중 ${v.beat_ratio}%에서 앞섬</small></div>`).join("");
+  const bk = (b.buckets[btHold] || []);
+  const maxAbs = Math.max(1, ...bk.map(x => Math.abs(x.excess)));
+  const bucketRows = bk.map(x => `<tr><td class="l">${x.label}</td>
+    <td class="${sgn(x.excess)}"><span class="hbar" style="width:${Math.abs(x.excess)/maxAbs*70}px;background:var(${x.excess>=0?'--up':'--down'})"></span> ${sign(x.excess)}</td>
+    <td>${x.beat}%</td><td class="hide-m">${x.times}번</td><td class="hide-m">${x.avg_count}개</td></tr>`).join("");
+  const rows = b.rows.slice().reverse().map(r => `<tr><td class="l">${ymd(r.date)}</td>
+    ${b.hold.map(h => `<td class="${sgn((r['r'+h]??0)-(r['m'+h]??0))}">${r['r'+h]==null?"-":r['r'+h]+"%"}</td><td class="hide-m">${r['m'+h]==null?"-":r['m'+h]+"%"}</td>`).join("")}</tr>`).join("");
+  el.innerHTML = `<p class="small" style="margin:0 0 10px">${b.from?ymd(b.from):""}부터 ${BT_STEP_TEXT()} 같은 규칙(${W}일, 기본 비중)으로 골랐다면 어땠는지입니다. 수수료·세금은 빼지 않았고, 지나간 결과가 앞으로도 같으리라는 보장은 없습니다. 비교 횟수가 적으면 우연일 가능성이 큽니다.</p>
+    <div class="bt-sum">${sum}</div>
+    <h3>점수가 높을수록 정말 나았을까</h3>
+    <div class="controls"><span class="lbl">기간</span><div class="seg" id="bth">${Object.keys(b.summary).map(h => `<button data-v="${h}" class="${h===btHold?'on':''}">${h}일 뒤</button>`).join("")}</div></div>
+    <p class="small" style="margin:0 0 6px">점수 구간별로, 그 구간 종목의 평균 수익률이 같은 날 시장 중앙값보다 얼마나 높았는지(초과 수익) 평균한 값입니다. 위 구간일수록 초과 수익이 크면 점수가 의미 있다는 뜻입니다.</p>
+    <div class="tbl"><table><thead><tr><th class="l">점수 구간</th><th>시장보다</th><th>앞선 비율</th><th class="hide-m">비교 횟수</th><th class="hide-m">구간 평균 종목 수</th></tr></thead><tbody>${bucketRows}</tbody></table></div>
+    <h3 style="margin-top:16px">시점별 기록 (최근 ${b.rows.length}번)</h3>
+    <div class="tbl"><table><thead><tr><th class="l">신호일</th>${b.hold.map(h=>`<th>${h}일 뒤 후보</th><th class="hide-m">${h}일 뒤 시장</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  $$("#bth button").forEach(x => x.onclick = () => { btHold = x.dataset.v; renderBT(); });
+}
+function BT_STEP_TEXT(){ return "5거래일마다"; }
 </script>
 </body>
 </html>
